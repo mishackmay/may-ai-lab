@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: may-ai-lab
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: OLLAMA_MODEL
+        value: mistral

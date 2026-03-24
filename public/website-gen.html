@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Website Generator - May AI Lab</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f9fafb;
+        }
+        
+        .generator-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        
+        .generator-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-top: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+        
+        .form-group label .optional {
+            font-weight: normal;
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-left: 0.5rem;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+            margin: 0;
+        }
+        
+        .services-grid-input {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .service-input {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .service-input input {
+            flex: 1;
+        }
+        
+        .service-input button {
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        .add-service-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        
+        .color-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .color-row input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .color-row input[type="text"] {
+            flex: 1;
+        }
+        
+        .contact-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .section-title:first-of-type {
+            margin-top: 0;
+        }
+        
+        .generate-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+        
+        .generate-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .preview-container {
+            margin-top: 2rem;
+            border-radius: 16px;
+            background: white;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: #f3f4f6;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .download-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .preview-frame {
+            width: 100%;
+            height: 550px;
+            border: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            display: none;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .helper-text {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+        
+        .toggle-advanced {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            padding: 0;
+        }
+        
+        .advanced-section {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #e5e7eb;
+        }
+        
+        .advanced-section.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">May AI Lab</div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/agent">AI Agent</a></li>
+            <li><a href="/website-gen">Website Generator</a></li>
+            <li><a href="/business">Business Dashboard</a></li>
+            <li><a href="/troubleshooting">Troubleshooting</a></li>
+            <li><a href="/face-auth">Face Login</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <div class="generator-container">
+            <h1>🌐 AI Website Generator</h1>
+            <p>Fill in your business details below, or let AI generate them automatically.</p>
+            
+            <div class="generator-form">
+                <!-- Basic Info -->
+                <div class="form-group">
+                    <label>🏢 Business Name <span class="optional">(required)</span></label>
+                    <input type="text" id="businessName" placeholder="e.g., Morning Brew Coffee">
+                </div>
+                
+                <div class="form-group">
+                    <label>📍 Location <span class="optional">(required)</span></label>
+                    <input type="text" id="location" placeholder="e.g., Cape Town, South Africa">
+                </div>
+                
+                <div class="form-group">
+                    <label>✨ Tagline / Slogan <span class="optional">(optional - AI will generate if blank)</span></label>
+                    <input type="text" id="tagline" placeholder="Leave blank for AI to generate">
+                </div>
+                
+                <!-- Services -->
+                <div class="section-title">🛠️ Services</div>
+                <div class="services-grid-input" id="servicesContainer">
+                    <div class="service-input"><input type="text" class="service-input-field" placeholder="Service 1" value="Fresh Coffee"></div>
+                    <div class="service-input"><input type="text" class="service-input-field" placeholder="Service 2" value="Pastries"></div>
+                    <div class="service-input"><input type="text" class="service-input-field" placeholder="Service 3" value="Free WiFi"></div>
+                    <div class="service-input"><input type="text" class="service-input-field" placeholder="Service 4" value="Catering"></div>
+                </div>
+                <button type="button" class="add-service-btn" onclick="addService()">+ Add Another Service</button>
+                <div class="helper-text">Edit service names or leave as is - AI will generate descriptions</div>
+                
+                <!-- About Section (Optional) -->
+                <div class="section-title">📖 About Section</div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="customAboutToggle">
+                    <label for="customAboutToggle">Write my own About content (leave unchecked for AI to generate)</label>
+                </div>
+                <div id="customAboutSection" style="display: none; margin-top: 0.5rem;">
+                    <textarea id="customAbout" rows="4" placeholder="Tell your story... What makes your business special? Why should customers choose you?" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px;"></textarea>
+                </div>
+                
+                <!-- Service Descriptions (Optional) -->
+                <div class="section-title">📝 Service Descriptions</div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="customServiceDescToggle">
+                    <label for="customServiceDescToggle">Customize service descriptions (leave unchecked for AI to generate)</label>
+                </div>
+                <div id="customServiceDescSection" style="display: none; margin-top: 0.5rem;">
+                    <div id="serviceDescContainer"></div>
+                    <div class="helper-text">Each service will have a brief description - write your own or let AI handle it</div>
+                </div>
+                
+                <!-- Colors -->
+                <div class="section-title">🎨 Brand Colors</div>
+                <div class="form-group">
+                    <label>Primary Color</label>
+                    <div class="color-row">
+                        <input type="color" id="primaryColor" value="#8B4513">
+                        <input type="text" id="primaryColorText" placeholder="#8B4513" value="#8B4513">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Secondary Color</label>
+                    <div class="color-row">
+                        <input type="color" id="secondaryColor" value="#D2691E">
+                        <input type="text" id="secondaryColorText" placeholder="#D2691E" value="#D2691E">
+                    </div>
+                </div>
+                
+                <!-- Contact Details -->
+                <div class="section-title">📞 Contact Details</div>
+                <div class="contact-row">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="phone" placeholder="+27 79 123 4567">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="email" placeholder="info@yourbusiness.com">
+                    </div>
+                </div>
+                <div class="contact-row">
+                    <div class="form-group">
+                        <label>WhatsApp Number</label>
+                        <input type="tel" id="whatsapp" placeholder="+27 79 123 4567">
+                    </div>
+                    <div class="form-group">
+                        <label>Website / Social (optional)</label>
+                        <input type="text" id="website" placeholder="https://www.instagram.com/yourbusiness">
+                    </div>
+                </div>
+                
+                <!-- Business Type (for AI suggestions) -->
+                <div class="section-title">🤖 AI Assistant</div>
+                <div class="form-group">
+                    <label>Business Type <span class="optional">(helps AI generate relevant content)</span></label>
+                    <input type="text" id="businessType" placeholder="e.g., Coffee Shop, Donut Shop, Gym, Restaurant">
+                </div>
+                
+                <button class="generate-btn" onclick="generateWebsite()">✨ Generate Website</button>
+                <div class="helper-text" style="text-align: center;">💡 Fill in what you know - AI will handle the rest!</div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>🎨 Generating your beautiful website...</p>
+            </div>
+            
+            <div class="preview-container" id="preview" style="display: none;">
+                <div class="preview-header">
+                    <span>📱 Website Preview</span>
+                    <button class="download-btn" onclick="downloadWebsite()">📥 Download ZIP</button>
+                </div>
+                <iframe class="preview-frame" id="previewFrame"></iframe>
+                <div class="helper-text" style="padding: 1rem; text-align: center; background: #f9fafb;">
+                    ⬇️ Click download to get HTML/CSS/JS files
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <script>
+        let currentFiles = null;
+        
+        // Toggle for custom about section
+        document.getElementById('customAboutToggle').addEventListener('change', function() {
+            document.getElementById('customAboutSection').style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // Toggle for custom service descriptions
+        document.getElementById('customServiceDescToggle').addEventListener('change', function() {
+            document.getElementById('customServiceDescSection').style.display = this.checked ? 'block' : 'none';
+            if (this.checked) {
+                updateServiceDescInputs();
+            }
+        });
+        
+        function updateServiceDescInputs() {
+            const services = getServices();
+            const container = document.getElementById('serviceDescContainer');
+            container.innerHTML = services.map((service, index) => `
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label>${service}:</label>
+                    <textarea class="service-desc-input" data-index="${index}" rows="2" placeholder="Describe ${service.toLowerCase()}..."></textarea>
+                </div>
+            `).join('');
+        }
+        
+        function addService() {
+            const container = document.getElementById('servicesContainer');
+            const newDiv = document.createElement('div');
+            newDiv.className = 'service-input';
+            newDiv.innerHTML = `
+                <input type="text" class="service-input-field" placeholder="New Service" value="New Service">
+                <button onclick="removeService(this)">×</button>
+            `;
+            container.appendChild(newDiv);
+            if (document.getElementById('customServiceDescToggle').checked) {
+                updateServiceDescInputs();
+            }
+        }
+        
+        function removeService(btn) {
+            const serviceDiv = btn.parentElement;
+            const container = document.getElementById('servicesContainer');
+            if (container.children.length > 1) {
+                serviceDiv.remove();
+                if (document.getElementById('customServiceDescToggle').checked) {
+                    updateServiceDescInputs();
+                }
+            } else {
+                alert('At least one service is required');
+            }
+        }
+        
+        function getServices() {
+            const inputs = document.querySelectorAll('.service-input-field');
+            return Array.from(inputs).map(input => input.value.trim()).filter(s => s);
+        }
+        
+        function getServiceDescriptions() {
+            if (!document.getElementById('customServiceDescToggle').checked) return null;
+            const descs = document.querySelectorAll('.service-desc-input');
+            const services = getServices();
+            const result = {};
+            descs.forEach((desc, i) => {
+                if (services[i] && desc.value.trim()) {
+                    result[services[i]] = desc.value.trim();
+                }
+            });
+            return Object.keys(result).length > 0 ? result : null;
+        }
+        
+        // Sync color picker with text input
+        const primaryColor = document.getElementById('primaryColor');
+        const primaryColorText = document.getElementById('primaryColorText');
+        const secondaryColor = document.getElementById('secondaryColor');
+        const secondaryColorText = document.getElementById('secondaryColorText');
+        
+        primaryColor.addEventListener('input', () => primaryColorText.value = primaryColor.value);
+        primaryColorText.addEventListener('input', () => primaryColor.value = primaryColorText.value);
+        secondaryColor.addEventListener('input', () => secondaryColorText.value = secondaryColor.value);
+        secondaryColorText.addEventListener('input', () => secondaryColor.value = secondaryColorText.value);
+        
+        async function generateWebsite() {
+            // Collect all user inputs
+            const userInputs = {
+                name: document.getElementById('businessName').value.trim(),
+                location: document.getElementById('location').value.trim(),
+                tagline: document.getElementById('tagline').value.trim(),
+                services: getServices(),
+                serviceDescriptions: getServiceDescriptions(),
+                primaryColor: document.getElementById('primaryColor').value,
+                secondaryColor: document.getElementById('secondaryColor').value,
+                businessType: document.getElementById('businessType').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                whatsapp: document.getElementById('whatsapp').value.trim(),
+                website: document.getElementById('website').value.trim(),
+                customAbout: document.getElementById('customAboutToggle').checked ? document.getElementById('customAbout').value.trim() : null
+            };
+            
+            // Validate at least name
+            if (!userInputs.name) {
+                alert('Please enter a Business Name');
+                return;
+            }
+            
+            // Build description for backend
+            let description = `BUSINESS NAME: "${userInputs.name}". `;
+            if (userInputs.businessType) description += `Business type: ${userInputs.businessType}. `;
+            if (userInputs.location) description += `Located in ${userInputs.location}. `;
+            if (userInputs.tagline) description += `Tagline: ${userInputs.tagline}. `;
+            description += `Services: ${userInputs.services.join(', ')}. `;
+            
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('preview').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/website/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ description, userInputs })
+                });
+                
+                const result = await response.json();
+                
+                if (result.html) {
+                    currentFiles = result;
+                    document.getElementById('previewFrame').src = result.html;
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('preview').style.display = 'block';
+                } else {
+                    alert('Error generating website: ' + (result.error || 'Unknown error'));
+                    document.getElementById('loading').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error connecting to server');
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        async function downloadWebsite() {
+            if (!currentFiles) {
+                alert('No website to download. Generate a website first.');
+                return;
+            }
+            
+            try {
+                const htmlResponse = await fetch(currentFiles.html);
+                const cssResponse = await fetch(currentFiles.css);
+                const jsResponse = await fetch(currentFiles.js);
+                
+                const htmlContent = await htmlResponse.text();
+                const cssContent = await cssResponse.text();
+                const jsContent = await jsResponse.text();
+                
+                const zip = new JSZip();
+                const htmlFilename = currentFiles.html.split('/').pop();
+                const cssFilename = currentFiles.css.split('/').pop();
+                const jsFilename = currentFiles.js.split('/').pop();
+                
+                zip.file(htmlFilename, htmlContent);
+                zip.file(cssFilename, cssContent);
+                zip.file(jsFilename, jsContent);
+                
+                const content = await zip.generateAsync({ type: "blob" });
+                saveAs(content, "website.zip");
+                
+                alert('Website downloaded! Unzip to get your files.');
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('Error downloading website.');
+            }
+        }
+    </script>
+</body>
+</html>

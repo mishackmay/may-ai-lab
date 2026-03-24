@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Recognition - May AI Lab</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <style>
+        .face-container { max-width: 800px; margin: 2rem auto; padding: 2rem; text-align: center; }
+        .video-container { position: relative; width: 100%; max-width: 640px; margin: 2rem auto; }
+        #video { width: 100%; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .controls { display: flex; gap: 1rem; justify-content: center; margin: 2rem 0; }
+        .controls button { padding: 0.75rem 2rem; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
+        #registerBtn { background: #28a745; color: white; }
+        #loginBtn { background: #667eea; color: white; }
+        .username-input { margin: 1rem 0; }
+        .username-input input { padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; width: 200px; }
+        .status { margin-top: 1rem; padding: 1rem; border-radius: 5px; display: none; }
+        .status.success { background: #d4edda; color: #155724; display: block; }
+        .status.error { background: #f8d7da; color: #721c24; display: block; }
+        .status.info { background: #e3f2fd; color: #0d47a1; display: block; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">May AI Lab</div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/agent">AI Agent</a></li>
+            <li><a href="/website-gen">Website Generator</a></li>
+            <li><a href="/business">Business Dashboard</a></li>
+            <li><a href="/troubleshooting">Troubleshooting</a></li>
+            <li><a href="/face-auth">Face Login</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="face-container">
+            <h1>Face Recognition Login</h1>
+            <div class="video-container">
+                <video id="video" autoplay muted></video>
+                <canvas id="canvas"></canvas>
+            </div>
+
+            <div class="username-input">
+                <input type="text" id="username" placeholder="Enter username for registration">
+            </div>
+
+            <div class="controls">
+                <button id="registerBtn">Register Face</button>
+                <button id="loginBtn">Login with Face</button>
+            </div>
+
+            <div id="status" class="status"></div>
+        </div>
+    </main>
+
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let currentFaceDescriptor = null;
+    let detectionStatusId = null; // For separate detection status
+
+    // Create a separate div for detection status
+    const detectionDiv = document.createElement('div');
+    detectionDiv.id = 'detection-status';
+    detectionDiv.style.marginTop = '10px';
+    detectionDiv.style.padding = '0.5rem';
+    detectionDiv.style.borderRadius = '5px';
+    document.querySelector('.video-container').after(detectionDiv);
+
+    function updateDetectionStatus(detections) {
+        if (detections.length > 0) {
+            detectionDiv.className = 'status success';
+            detectionDiv.textContent = ' Face detected ✅';
+        } else {
+            detectionDiv.className = 'status error';
+            detectionDiv.textContent = ' No face detected ❌';
+        }
+    }
+
+    async function startVideo() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+        } catch (error) {
+            showStatus('Error accessing webcam', 'error');
+        }
+    }
+
+    async function loadModels() {
+        try {
+            await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+            await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+            await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+        } catch (error) {
+            console.error('Error loading models:', error);
+        }
+    }
+
+    async function detectFace() {
+        if (!video.srcObject) return;
+
+        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+            .withFaceLandmarks()
+            .withFaceDescriptors();
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (detections.length > 0) {
+            faceapi.draw.drawDetections(canvas, detections);
+            faceapi.draw.drawFaceLandmarks(canvas, detections);
+            currentFaceDescriptor = Array.from(detections[0].descriptor);
+        }
+async function detectFace() {
+    if (!video.srcObject) return;
+
+    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptors();
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (detections.length > 0) {
+        faceapi.draw.drawDetections(canvas, detections);
+        faceapi.draw.drawFaceLandmarks(canvas, detections);
+        currentFaceDescriptor = Array.from(detections[0].descriptor);
+        
+        // TEMPORARY DEBUG - log descriptor to see if it's changing
+        console.log('Current face descriptor length:', currentFaceDescriptor.length);
+        console.log('First 5 values:', currentFaceDescriptor.slice(0, 5));
+    }
+
+    updateDetectionStatus(detections);
+    requestAnimationFrame(detectFace);
+}
+        // Update detection status only (no auto-login)
+        updateDetectionStatus(detections);
+
+        // FIXED: Use detectFace, not detectFrame
+        requestAnimationFrame(detectFace);
+    }
+
+    video.addEventListener('play', detectFace);
+
+    // Register handler
+    document.getElementById('registerBtn').addEventListener('click', async () => {
+        const username = document.getElementById('username').value.trim();
+        if (!username) { showStatus('Please enter a username', 'error'); return; }
+        if (!currentFaceDescriptor) { showStatus('No face detected', 'error'); return; }
+
+        try {
+            const res = await fetch('/api/face/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, faceDescriptor: currentFaceDescriptor })
+            });
+            const result = await res.json();
+            showStatus(`User ${username} registered successfully!`, 'success');
+        } catch (error) {
+            console.error(error);
+            showStatus('Error registering user', 'error');
+        }
+    });
+
+    // Login handler - MANUAL only (removed auto-login)
+// Login handler
+document.getElementById('loginBtn').addEventListener('click', async () => {
+    if (!currentFaceDescriptor) { 
+        showStatus('No face detected', 'error'); 
+        return; 
+    }
+
+    try {
+        const res = await fetch('/api/face/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ faceDescriptor: currentFaceDescriptor })
+        });
+        const result = await res.json();
+        
+        console.log('=== FRONTEND DEBUG ===');
+        console.log('Raw result:', result);
+        console.log('Result.username:', result.username);
+        console.log('Result.username type:', typeof result.username);
+
+        if (result.username) {
+            showStatus(`Welcome back, ${result.username}!`, 'success');
+        } else {
+            showStatus('Face not recognized', 'error');
+        }
+    } catch (error) {
+        console.error(error);
+        showStatus('Error verifying face', 'error');
+    }
+});
+
+    function showStatus(message, type) {
+        const status = document.getElementById('status');
+        status.className = `status ${type}`;
+        status.textContent = message;
+        
+        // Auto-clear after 3 seconds
+        setTimeout(() => {
+            status.className = 'status';
+            status.textContent = '';
+        }, 3000);
+    }
+
+    async function init() {
+        await loadModels();
+        await startVideo();
+    }
+
+    init();
+</script>
+</body>
+</html>

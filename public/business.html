@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Business Dashboard - May AI Lab</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 1rem;
+        }
+        
+        .tab {
+            padding: 0.5rem 2rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            color: #666;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .add-form {
+            background: #f5f5f5;
+            padding: 1.5rem;
+            border-radius: 5px;
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .add-form input, .add-form select, .add-form button {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .add-form button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f5f5f5;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.875rem;
+        }
+        
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-paid { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">May AI Lab</div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/agent">AI Agent</a></li>
+            <li><a href="/website-gen">Website Generator</a></li>
+            <li><a href="/business">Business Dashboard</a></li>
+            <li><a href="/troubleshooting">Troubleshooting</a></li>
+            <li><a href="/face-auth">Face Login</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <div class="dashboard-container">
+            <h1>Business Automation Dashboard</h1>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('customers')">Customers</button>
+                <button class="tab" onclick="switchTab('bookings')">Bookings</button>
+                <button class="tab" onclick="switchTab('invoices')">Invoices</button>
+            </div>
+            
+            <div id="customers-view">
+                <div class="add-form">
+                    <input type="text" id="customerName" placeholder="Name">
+                    <input type="email" id="customerEmail" placeholder="Email">
+                    <input type="tel" id="customerPhone" placeholder="Phone">
+                    <button onclick="addCustomer()">Add Customer</button>
+                </div>
+                <table id="customers-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <div id="bookings-view" style="display: none;">
+                <div class="add-form">
+                    <select id="bookingCustomer">
+                        <option value="">Select Customer</option>
+                    </select>
+                    <input type="text" id="bookingService" placeholder="Service">
+                    <input type="date" id="bookingDate">
+                    <input type="time" id="bookingTime">
+                    <button onclick="addBooking()">Add Booking</button>
+                </div>
+                <table id="bookings-table">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <div id="invoices-view" style="display: none;">
+                <div class="add-form">
+                    <select id="invoiceCustomer">
+                        <option value="">Select Customer</option>
+                    </select>
+                    <input type="number" id="invoiceAmount" placeholder="Amount" step="0.01">
+                    <button onclick="addInvoice()">Create Invoice</button>
+                </div>
+                <table id="invoices-table">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('[id$="-view"]').forEach(v => v.style.display = 'none');
+            
+            document.querySelector(`.tab[onclick*="${tab}"]`).classList.add('active');
+            document.getElementById(`${tab}-view`).style.display = 'block';
+            
+            loadData();
+        }
+        
+        async function loadData() {
+            await loadCustomers();
+            await loadBookings();
+            await loadInvoices();
+        }
+        
+        async function loadCustomers() {
+            try {
+                const response = await fetch('/api/business/customers');
+                const customers = await response.json();
+                
+                // Update customers table
+                const tbody = document.querySelector('#customers-table tbody');
+                tbody.innerHTML = customers.map(c => `
+                    <tr>
+                        <td>${c.name}</td>
+                        <td>${c.email}</td>
+                        <td>${c.phone}</td>
+                        <td>${new Date(c.created_at).toLocaleDateString()}</td>
+                    </tr>
+                `).join('');
+                
+                // Update dropdowns
+                const options = customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                document.getElementById('bookingCustomer').innerHTML = '<option value="">Select Customer</option>' + options;
+                document.getElementById('invoiceCustomer').innerHTML = '<option value="">Select Customer</option>' + options;
+            } catch (error) {
+                console.error('Error loading customers:', error);
+            }
+        }
+        
+        async function loadBookings() {
+            try {
+                const response = await fetch('/api/business/bookings');
+                const bookings = await response.json();
+                
+                const tbody = document.querySelector('#bookings-table tbody');
+                tbody.innerHTML = bookings.map(b => `
+                    <tr>
+                        <td>${b.customer_name}</td>
+                        <td>${b.service}</td>
+                        <td>${b.date}</td>
+                        <td>${b.time}</td>
+                        <td><span class="status-badge status-${b.status}">${b.status}</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+            }
+        }
+        
+        async function loadInvoices() {
+            try {
+                const response = await fetch('/api/business/invoices');
+                const invoices = await response.json();
+                
+                const tbody = document.querySelector('#invoices-table tbody');
+                tbody.innerHTML = invoices.map(i => `
+                    <tr>
+                        <td>${i.customer_name}</td>
+                        <td>$${i.amount}</td>
+                        <td><span class="status-badge status-${i.status}">${i.status}</span></td>
+                        <td>${new Date(i.created_at).toLocaleDateString()}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading invoices:', error);
+            }
+        }
+        
+        async function addCustomer() {
+            const name = document.getElementById('customerName').value;
+            const email = document.getElementById('customerEmail').value;
+            const phone = document.getElementById('customerPhone').value;
+            
+            if (!name || !email) {
+                alert('Name and email are required');
+                return;
+            }
+            
+            try {
+                await fetch('/api/business/customers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, phone })
+                });
+                
+                document.getElementById('customerName').value = '';
+                document.getElementById('customerEmail').value = '';
+                document.getElementById('customerPhone').value = '';
+                
+                loadCustomers();
+            } catch (error) {
+                console.error('Error adding customer:', error);
+            }
+        }
+        
+        async function addBooking() {
+            const customer_id = document.getElementById('bookingCustomer').value;
+            const service = document.getElementById('bookingService').value;
+            const date = document.getElementById('bookingDate').value;
+            const time = document.getElementById('bookingTime').value;
+            
+            if (!customer_id || !service || !date || !time) {
+                alert('All fields are required');
+                return;
+            }
+            
+            try {
+                await fetch('/api/business/bookings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ customer_id, service, date, time })
+                });
+                
+                document.getElementById('bookingService').value = '';
+                document.getElementById('bookingDate').value = '';
+                document.getElementById('bookingTime').value = '';
+                
+                loadBookings();
+            } catch (error) {
+                console.error('Error adding booking:', error);
+            }
+        }
+        
+        async function addInvoice() {
+            const customer_id = document.getElementById('invoiceCustomer').value;
+            const amount = document.getElementById('invoiceAmount').value;
+            
+            if (!customer_id || !amount) {
+                alert('All fields are required');
+                return;
+            }
+            
+            try {
+                await fetch('/api/business/invoices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ customer_id, amount })
+                });
+                
+                document.getElementById('invoiceAmount').value = '';
+                loadInvoices();
+            } catch (error) {
+                console.error('Error adding invoice:', error);
+            }
+        }
+        
+        // Initial load
+        loadData();
+    </script>
+</body>
+</html>
