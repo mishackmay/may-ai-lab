@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
-app.use(timeout('180s'));
+app.use(timeout('240s'));
 
 // Database setup
 const db = new sqlite3.Database('./data/may-ai.db');
@@ -92,7 +92,7 @@ app.post('/api/website/generate', async (req, res) => {
             websiteGen.generate(description, userInputs),
             new Promise((_, reject) => setTimeout(() => {
                 if (!isSent) reject(new Error('Timeout'));
-            }, 110000))
+            }, 180000))
         ]);
         
         if (!isSent) {
@@ -266,7 +266,25 @@ app.get('/api/debug/users', (req, res) => {
     });
     db.close();
 });
-
+// Test route to see what queries Ollama generates
+app.get('/api/test-queries', async (req, res) => {
+    const testDetails = {
+        type: 'Coffee Shop',
+        name: 'Morning Brew Coffee',
+        designStyle: 'cozy'
+    };
+    try {
+        const heroQueries = await websiteGen.generateImageQueries(testDetails, "hero");
+        const aboutQueries = await websiteGen.generateImageQueries(testDetails, "about");
+        res.json({ 
+            hero: heroQueries,
+            about: aboutQueries
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 app.listen(PORT, () => {
   console.log(`May AI Lab running at http://localhost:${PORT}`);
+
 });
