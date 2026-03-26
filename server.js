@@ -1,8 +1,8 @@
 const express = require('express');
 const path = require('path');
-const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const timeout = require('connect-timeout');
+const { Pool } = require('pg');
 require('dotenv').config();
 
 console.log('PORT from .env:', process.env.PORT);
@@ -11,139 +11,125 @@ console.log('OLLAMA_MODEL from .env:', process.env.OLLAMA_MODEL);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Free tier tracking (in-memory, resets on server restart)
-// For production, replace with database storage
-const freeGenerations = new Map();
-
-function canGenerateFree(ip) {
-    const today = new Date().toDateString();
-    const key = `${ip}-${today}`;
-    const count = freeGenerations.get(key) || 0;
-    return count < 3; // 3 free websites per day
-}
-
-function incrementFreeGeneration(ip) {
-    const today = new Date().toDateString();
-    const key = `${ip}-${today}`;
-    const count = freeGenerations.get(key) || 0;
-    freeGenerations.set(key, count + 1);
-    console.log(`Free generations for ${ip} today: ${count + 1}`);
-}
-
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 app.use(timeout('240s'));
 
-// Database setup
-const db = new sqlite3.Database('./data/may-ai.db');
-
-// Create tables
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE,
-    face_descriptor TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )`);
-
-  // Business tables
-  db.run(`CREATE TABLE IF NOT EXISTS customers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    email TEXT,
-    phone TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )`);
-
-  db.run(`CREATE TABLE IF NOT EXISTS bookings (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    customer_id INTEGER,
-    service TEXT,
-    date TEXT,
-    time TEXT,
-    status TEXT DEFAULT 'pending',
-    FOREIGN KEY(customer_id) REFERENCES customers(id)
-  )`);
-
-  db.run(`CREATE TABLE IF NOT EXISTS invoices (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    customer_id INTEGER,
-    amount REAL,
-    status TEXT DEFAULT 'unpaid',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(customer_id) REFERENCES customers(id)
-  )`);
-
-  // Website generations tracking table
-  db.run(`CREATE TABLE IF NOT EXISTS website_generations (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    business_name TEXT,
-    business_type TEXT,
-    location TEXT,
-    services TEXT,
-    phone TEXT,
-    email TEXT,
-    whatsapp TEXT,
-    website TEXT,
-    user_input TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )`);
-
-  // Free tier tracking table (for persistent storage)
-  db.run(`CREATE TABLE IF NOT EXISTS free_tier_usage (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    ip_address TEXT,
-    date TEXT,
-    count INTEGER DEFAULT 1,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(ip_address, date)
-  )`);
+// PostgreSQL connection
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
 });
 
-// Helper function to check free tier limit with database persistence
+// Create tables
+async function initDatabase() {
+    const client = await pool.connect();
+    try {
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username TEXT UNIQUE,
+                face_descriptor TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS customers (
+                id SERIAL PRIMARY KEY,
+                name TEXT,
+                email TEXT,
+                phone TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS bookings (
+                id SERIAL PRIMARY KEY,
+                customer_id INTEGER REFERENCES customers(id),
+                service TEXT,
+                date TEXT,
+                time TEXT,
+                status TEXT DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS invoices (
+                id SERIAL PRIMARY KEY,
+                customer_id INTEGER REFERENCES customers(id),
+                amount REAL,
+                status TEXT DEFAULT 'unpaid',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS website_generations (
+                id SERIAL PRIMARY KEY,
+                business_name TEXT,
+                business_type TEXT,
+                location TEXT,
+                services TEXT,
+                phone TEXT,
+                email TEXT,
+                whatsapp TEXT,
+                website TEXT,
+                user_input TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS free_tier_usage (
+                id SERIAL PRIMARY KEY,
+                ip_address TEXT,
+                date TEXT,
+                count INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(ip_address, date)
+            )
+        `);
+        
+        console.log('✅ Database tables ready');
+    } catch (err) {
+        console.error('❌ Database init error:', err);
+    } finally {
+        client.release();
+    }
+}
+
+initDatabase();
+
+// Helper functions for free tier
 async function checkFreeTierLimit(ip) {
-    return new Promise((resolve, reject) => {
-        const today = new Date().toDateString();
-        db.get(
-            'SELECT count FROM free_tier_usage WHERE ip_address = ? AND date = ?',
-            [ip, today],
-            (err, row) => {
-                if (err) {
-                    console.error('DB error:', err);
-                    resolve(true); // Allow if DB error
-                    return;
-                }
-                const count = row ? row.count : 0;
-                resolve(count < 3);
-            }
-        );
-    });
+    const today = new Date().toDateString();
+    const result = await pool.query(
+        'SELECT count FROM free_tier_usage WHERE ip_address = $1 AND date = $2',
+        [ip, today]
+    );
+    const count = result.rows[0]?.count || 0;
+    return count < 3;
 }
 
 async function incrementFreeTierUsage(ip) {
-    return new Promise((resolve, reject) => {
-        const today = new Date().toDateString();
-        db.run(
-            `INSERT INTO free_tier_usage (ip_address, date, count) 
-             VALUES (?, ?, 1) 
-             ON CONFLICT(ip_address, date) 
-             DO UPDATE SET count = count + 1`,
-            [ip, today],
-            function(err) {
-                if (err) {
-                    console.error('DB error:', err);
-                }
-                resolve();
-            }
-        );
-    });
+    const today = new Date().toDateString();
+    await pool.query(
+        `INSERT INTO free_tier_usage (ip_address, date, count) 
+         VALUES ($1, $2, 1) 
+         ON CONFLICT (ip_address, date) 
+         DO UPDATE SET count = free_tier_usage.count + 1`,
+        [ip, today]
+    );
 }
 
 // Routes
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 console.log(path.join(__dirname, 'public', 'website-gen.html'));
@@ -153,11 +139,8 @@ const websiteGen = new WebsiteGenerator();
 // Website Generator Route with free tier limits
 app.post('/api/website/generate', async (req, res) => {
     let isSent = false;
-    
-    // Get user IP (handles proxy headers)
     const userIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     
-    // Check free tier limit
     const canGenerate = await checkFreeTierLimit(userIp);
     if (!canGenerate) {
         if (!isSent) {
@@ -183,27 +166,26 @@ app.post('/api/website/generate', async (req, res) => {
         
         if (!isSent) {
             isSent = true;
-            
-            // Track free tier usage
             await incrementFreeTierUsage(userIp);
             
-            // Track the generation for analytics
+            // Track generation
             try {
-                const stmt = db.prepare(`INSERT INTO website_generations 
+                await pool.query(
+                    `INSERT INTO website_generations 
                     (business_name, business_type, location, services, phone, email, whatsapp, website, user_input) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
-                stmt.run(
-                    userInputs?.name || 'Unknown',
-                    userInputs?.businessType || 'Unknown',
-                    userInputs?.location || 'Unknown',
-                    JSON.stringify(userInputs?.services || []),
-                    userInputs?.phone || '',
-                    userInputs?.email || '',
-                    userInputs?.whatsapp || '',
-                    userInputs?.website || '',
-                    description || ''
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+                    [
+                        userInputs?.name || 'Unknown',
+                        userInputs?.businessType || 'Unknown',
+                        userInputs?.location || 'Unknown',
+                        JSON.stringify(userInputs?.services || []),
+                        userInputs?.phone || '',
+                        userInputs?.email || '',
+                        userInputs?.whatsapp || '',
+                        userInputs?.website || '',
+                        description || ''
+                    ]
                 );
-                stmt.finalize();
             } catch (trackError) {
                 console.error('Tracking error:', trackError);
             }
@@ -223,29 +205,22 @@ app.post('/api/website/generate', async (req, res) => {
 app.get('/api/remaining-generations', async (req, res) => {
     const userIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const today = new Date().toDateString();
-    
-    db.get(
-        'SELECT count FROM free_tier_usage WHERE ip_address = ? AND date = ?',
-        [userIp, today],
-        (err, row) => {
-            if (err) {
-                res.json({ remaining: 3, used: 0 });
-                return;
-            }
-            const used = row ? row.count : 0;
-            res.json({ remaining: Math.max(0, 3 - used), used });
-        }
+    const result = await pool.query(
+        'SELECT count FROM free_tier_usage WHERE ip_address = $1 AND date = $2',
+        [userIp, today]
     );
+    const used = result.rows[0]?.count || 0;
+    res.json({ remaining: Math.max(0, 3 - used), used });
 });
 
 app.get('/website-gen', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'website-gen.html'));
 });
 
+// Business Dashboard routes (with PostgreSQL)
 const BusinessDashboard = require('./modules/business/dashboard');
-const business = new BusinessDashboard();
+const business = new BusinessDashboard(pool);
 
-// Customers
 app.get('/api/business/customers', async (req, res) => {
     try {
         const customers = await business.getCustomers();
@@ -264,7 +239,6 @@ app.post('/api/business/customers', async (req, res) => {
     }
 });
 
-// Bookings
 app.get('/api/business/bookings', async (req, res) => {
     try {
         const bookings = await business.getBookings();
@@ -283,7 +257,6 @@ app.post('/api/business/bookings', async (req, res) => {
     }
 });
 
-// Invoices
 app.get('/api/business/invoices', async (req, res) => {
     try {
         const invoices = await business.getInvoices();
@@ -306,8 +279,9 @@ app.get('/business', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'business.html'));
 });
 
+// Face Auth routes (with PostgreSQL)
 const FaceAuth = require('./modules/face-auth/auth');
-const faceAuth = new FaceAuth();
+const faceAuth = new FaceAuth(pool);
 
 app.post('/api/face/register', async (req, res) => {
     try {
@@ -352,14 +326,13 @@ app.get('/troubleshooting', (req, res) => {
 });
 
 // Admin route to view website generation history
-app.get('/api/website/history', (req, res) => {
-    db.all('SELECT * FROM website_generations ORDER BY created_at DESC LIMIT 100', [], (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        res.json(rows);
-    });
+app.get('/api/website/history', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM website_generations ORDER BY created_at DESC LIMIT 100');
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Admin page
@@ -368,16 +341,13 @@ app.get('/admin', (req, res) => {
 });
 
 // Debug route
-app.get('/api/debug/users', (req, res) => {
-    const db = new sqlite3.Database(process.env.DATABASE_PATH || './data/may-ai.db');
-    db.all('SELECT username FROM users', [], (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        res.json(rows);
-    });
-    db.close();
+app.get('/api/debug/users', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT username FROM users');
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Test route to see what queries Ollama generates
@@ -400,6 +370,6 @@ app.get('/api/test-queries', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`May AI Lab running at http://localhost:${PORT}`);
-  console.log(`Free tier: 3 websites per IP per day`);
+    console.log(`May AI Lab running at http://localhost:${PORT}`);
+    console.log(`Free tier: 3 websites per IP per day`);
 });

@@ -1,85 +1,79 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-
 class BusinessDashboard {
-    constructor() {
-        this.db = new sqlite3.Database(path.join(__dirname, '../../data/may-ai.db'));
+    constructor(pool) {
+        this.pool = pool;
     }
 
     async getCustomers() {
-        return new Promise((resolve, reject) => {
-            this.db.all('SELECT * FROM customers ORDER BY created_at DESC', [], (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
-            });
-        });
+        try {
+            const result = await this.pool.query('SELECT * FROM customers ORDER BY created_at DESC');
+            return result.rows;
+        } catch (err) {
+            throw err;
+        }
     }
 
     async addCustomer(customer) {
-        return new Promise((resolve, reject) => {
-            this.db.run(
-                'INSERT INTO customers (name, email, phone) VALUES (?, ?, ?)',
-                [customer.name, customer.email, customer.phone],
-                function(err) {
-                    if (err) reject(err);
-                    else resolve({ id: this.lastID, ...customer });
-                }
+        try {
+            const result = await this.pool.query(
+                'INSERT INTO customers (name, email, phone) VALUES ($1, $2, $3) RETURNING id',
+                [customer.name, customer.email, customer.phone]
             );
-        });
+            return { id: result.rows[0].id, ...customer };
+        } catch (err) {
+            throw err;
+        }
     }
 
     async getBookings() {
-        return new Promise((resolve, reject) => {
-            this.db.all(`
+        try {
+            const result = await this.pool.query(`
                 SELECT b.*, c.name as customer_name 
                 FROM bookings b
                 JOIN customers c ON b.customer_id = c.id
                 ORDER BY b.date DESC, b.time DESC
-            `, [], (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
-            });
-        });
+            `);
+            return result.rows;
+        } catch (err) {
+            throw err;
+        }
     }
 
     async addBooking(booking) {
-        return new Promise((resolve, reject) => {
-            this.db.run(
-                'INSERT INTO bookings (customer_id, service, date, time) VALUES (?, ?, ?, ?)',
-                [booking.customer_id, booking.service, booking.date, booking.time],
-                function(err) {
-                    if (err) reject(err);
-                    else resolve({ id: this.lastID, ...booking });
-                }
+        try {
+            const result = await this.pool.query(
+                'INSERT INTO bookings (customer_id, service, date, time) VALUES ($1, $2, $3, $4) RETURNING id',
+                [booking.customer_id, booking.service, booking.date, booking.time]
             );
-        });
+            return { id: result.rows[0].id, ...booking };
+        } catch (err) {
+            throw err;
+        }
     }
 
     async getInvoices() {
-        return new Promise((resolve, reject) => {
-            this.db.all(`
+        try {
+            const result = await this.pool.query(`
                 SELECT i.*, c.name as customer_name 
                 FROM invoices i
                 JOIN customers c ON i.customer_id = c.id
                 ORDER BY i.created_at DESC
-            `, [], (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
-            });
-        });
+            `);
+            return result.rows;
+        } catch (err) {
+            throw err;
+        }
     }
 
     async addInvoice(invoice) {
-        return new Promise((resolve, reject) => {
-            this.db.run(
-                'INSERT INTO invoices (customer_id, amount) VALUES (?, ?)',
-                [invoice.customer_id, invoice.amount],
-                function(err) {
-                    if (err) reject(err);
-                    else resolve({ id: this.lastID, ...invoice });
-                }
+        try {
+            const result = await this.pool.query(
+                'INSERT INTO invoices (customer_id, amount) VALUES ($1, $2) RETURNING id',
+                [invoice.customer_id, invoice.amount]
             );
-        });
+            return { id: result.rows[0].id, ...invoice };
+        } catch (err) {
+            throw err;
+        }
     }
 }
 

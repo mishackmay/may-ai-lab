@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - May AI Lab</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #1f2937;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .pricing-container {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 2rem;
+        }
+
+        .pricing-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .pricing-header h1 {
+            font-size: 2.5rem;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-header p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        .hosting-notice {
+            background: #fef3c7;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hosting-notice p {
+            color: #92400e;
+        }
+
+        .pricing-grid {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .pricing-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            width: 320px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 30px rgba(0,0,0,0.1);
+        }
+
+        .pricing-card.popular {
+            border: 2px solid #667eea;
+        }
+
+        .popular-badge {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .card-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #667eea;
+            margin: 1rem 0 0.25rem;
+        }
+
+        .price-note {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+
+        .features {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+
+        .features li {
+            padding: 0.6rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .features li i {
+            color: #10b981;
+            width: 18px;
+        }
+
+        .features li.disabled {
+            color: #9ca3af;
+        }
+
+        .features li.disabled i {
+            color: #9ca3af;
+        }
+
+        .btn {
+            display: block;
+            text-align: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            margin-top: 1.5rem;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+
+        .btn-outline {
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .face-login-section {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin-top: 3rem;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+
+        .face-login-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .face-login-card {
+            max-width: 400px;
+            margin: 1.5rem auto 0;
+            padding: 1.5rem;
+            background: #f9fafb;
+            border-radius: 1rem;
+        }
+
+        .face-price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #667eea;
+        }
+
+        .test-btn {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: #f3f4f6;
+            color: #1f2937;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            background: #1f2937;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .pricing-grid {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">May AI Lab</div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/website-gen">Website Generator</a></li>
+                <li><a href="/business">Business Dashboard</a></li>
+                <li><a href="/troubleshooting">Troubleshooting</a></li>
+                <li><a href="/face-auth">Face Login</a></li>
+                <li><a href="/pricing">Pricing</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="pricing-container">
+        <div class="pricing-header">
+            <h1>Simple, one-time pricing</h1>
+            <p>Pay once, own forever. Host anywhere you want.</p>
+        </div>
+
+        <div class="hosting-notice">
+            <p>📦 <strong>We don't host your website.</strong> You download the code and host it yourself. No monthly fees, no surprises.</p>
+        </div>
+
+        <div class="pricing-grid">
+            <!-- Free Plan -->
+            <div class="pricing-card">
+                <div class="card-header">
+                    <h3>Free</h3>
+                    <div class="price">R0</div>
+                    <div class="price-note">One-time download</div>
+                </div>
+                <ul class="features">
+                    <li><i class="fas fa-check-circle"></i> 3 templates</li>
+                    <li><i class="fas fa-check-circle"></i> 3 websites/day</li>
+                    <li><i class="fas fa-check-circle"></i> Download code</li>
+                    <li class="disabled"><i class="fas fa-times-circle"></i> Watermark</li>
+                </ul>
+                <a href="/website-gen" class="btn btn-outline">Get Started</a>
+            </div>
+
+            <!-- Pro Plan -->
+            <div class="pricing-card popular">
+                <div class="popular-badge">🔥 MOST POPULAR</div>
+                <div class="card-header">
+                    <h3>Pro</h3>
+                    <div class="price">R149</div>
+                    <div class="price-note">One-time • Lifetime access</div>
+                </div>
+                <ul class="features">
+                    <li><i class="fas fa-check-circle"></i> All 50+ templates</li>
+                    <li><i class="fas fa-check-circle"></i> Unlimited websites</li>
+                    <li><i class="fas fa-check-circle"></i> No watermark</li>
+                    <li><i class="fas fa-check-circle"></i> Commercial license</li>
+                </ul>
+                <a href="#" class="btn btn-primary" onclick="alert('Payment coming soon!')">Buy Now - R149</a>
+            </div>
+
+            <!-- Business Plan -->
+            <div class="pricing-card">
+                <div class="card-header">
+                    <h3>Business</h3>
+                    <div class="price">R499</div>
+                    <div class="price-note">One-time • Lifetime access</div>
+                </div>
+                <ul class="features">
+                    <li><i class="fas fa-check-circle"></i> Everything in Pro</li>
+                    <li><i class="fas fa-check-circle"></i> Face Login included</li>
+                    <li><i class="fas fa-check-circle"></i> Custom branding</li>
+                    <li><i class="fas fa-check-circle"></i> Priority support</li>
+                </ul>
+                <a href="#" class="btn btn-primary" onclick="alert('Payment coming soon!')">Buy Now - R499</a>
+            </div>
+        </div>
+
+        <!-- Face Login Add-on (Standalone) -->
+        <div class="face-login-section">
+            <h2>🔐 Need Face Login only?</h2>
+            <p>Secure login system for businesses, offices, or member areas</p>
+            <div class="face-login-card">
+                <div class="face-price">R299</div>
+                <div class="price-note">One-time • Lifetime license</div>
+                <ul class="features" style="max-width: 250px; margin: 1rem auto;">
+                    <li><i class="fas fa-check-circle"></i> Face recognition login</li>
+                    <li><i class="fas fa-check-circle"></i> Easy integration code</li>
+                    <li><i class="fas fa-check-circle"></i> Self-host, keep data private</li>
+                </ul>
+                <a href="#" class="btn btn-primary" onclick="alert('Payment coming soon!')">Add Face Login - R299</a>
+            </div>
+            <div style="margin-top: 1rem;">
+                <a href="/face-auth" class="test-btn">🔍 Test Face Login Demo →</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 May AI Lab | 🇿🇦 Built in South Africa</p>
+        <p style="font-size: 0.8rem; margin-top: 0.5rem;">You download, you host, you own.</p>
+    </footer>
+</body>
+</html>
