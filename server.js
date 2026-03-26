@@ -11,6 +11,25 @@ console.log('OLLAMA_MODEL from .env:', process.env.OLLAMA_MODEL);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Free tier tracking (in-memory, resets on server restart)
+// For production, replace with database storage
+const freeGenerations = new Map();
+
+function canGenerateFree(ip) {
+    const today = new Date().toDateString();
+    const key = `${ip}-${today}`;
+    const count = freeGenerations.get(key) || 0;
+    return count < 3; // 3 free websites per day
+}
+
+function incrementFreeGeneration(ip) {
+    const today = new Date().toDateString();
+    const key = `${ip}-${today}`;
+    const count = freeGenerations.get(key) || 0;
+    freeGenerations.set(key, count + 1);
+    console.log(`Free generations for ${ip} today: ${count + 1}`);
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -71,7 +90,56 @@ db.serialize(() => {
     user_input TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+
+  // Free tier tracking table (for persistent storage)
+  db.run(`CREATE TABLE IF NOT EXISTS free_tier_usage (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ip_address TEXT,
+    date TEXT,
+    count INTEGER DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(ip_address, date)
+  )`);
 });
+
+// Helper function to check free tier limit with database persistence
+async function checkFreeTierLimit(ip) {
+    return new Promise((resolve, reject) => {
+        const today = new Date().toDateString();
+        db.get(
+            'SELECT count FROM free_tier_usage WHERE ip_address = ? AND date = ?',
+            [ip, today],
+            (err, row) => {
+                if (err) {
+                    console.error('DB error:', err);
+                    resolve(true); // Allow if DB error
+                    return;
+                }
+                const count = row ? row.count : 0;
+                resolve(count < 3);
+            }
+        );
+    });
+}
+
+async function incrementFreeTierUsage(ip) {
+    return new Promise((resolve, reject) => {
+        const today = new Date().toDateString();
+        db.run(
+            `INSERT INTO free_tier_usage (ip_address, date, count) 
+             VALUES (?, ?, 1) 
+             ON CONFLICT(ip_address, date) 
+             DO UPDATE SET count = count + 1`,
+            [ip, today],
+            function(err) {
+                if (err) {
+                    console.error('DB error:', err);
+                }
+                resolve();
+            }
+        );
+    });
+}
 
 // Routes
 app.get('/', (req, res) => {
@@ -82,9 +150,27 @@ console.log(path.join(__dirname, 'public', 'website-gen.html'));
 const WebsiteGenerator = require('./modules/website-gen/generator');
 const websiteGen = new WebsiteGenerator();
 
-// Website Generator Route with userInputs support
+// Website Generator Route with free tier limits
 app.post('/api/website/generate', async (req, res) => {
     let isSent = false;
+    
+    // Get user IP (handles proxy headers)
+    const userIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    
+    // Check free tier limit
+    const canGenerate = await checkFreeTierLimit(userIp);
+    if (!canGenerate) {
+        if (!isSent) {
+            isSent = true;
+            return res.status(429).json({ 
+                error: 'Free limit reached. You can generate up to 3 websites per day.',
+                upgradeUrl: '/pricing',
+                limit: 3
+            });
+        }
+        return;
+    }
+    
     try {
         const { description, userInputs } = req.body;
         
@@ -97,6 +183,9 @@ app.post('/api/website/generate', async (req, res) => {
         
         if (!isSent) {
             isSent = true;
+            
+            // Track free tier usage
+            await incrementFreeTierUsage(userIp);
             
             // Track the generation for analytics
             try {
@@ -128,6 +217,25 @@ app.post('/api/website/generate', async (req, res) => {
             res.status(500).json({ error: 'Generation timed out. Please try again with simpler description.' });
         }
     }
+});
+
+// Route to check remaining free generations
+app.get('/api/remaining-generations', async (req, res) => {
+    const userIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const today = new Date().toDateString();
+    
+    db.get(
+        'SELECT count FROM free_tier_usage WHERE ip_address = ? AND date = ?',
+        [userIp, today],
+        (err, row) => {
+            if (err) {
+                res.json({ remaining: 3, used: 0 });
+                return;
+            }
+            const used = row ? row.count : 0;
+            res.json({ remaining: Math.max(0, 3 - used), used });
+        }
+    );
 });
 
 app.get('/website-gen', (req, res) => {
@@ -225,6 +333,11 @@ app.get('/face-auth', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'face-auth.html'));
 });
 
+// Pricing page route
+app.get('/pricing', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'pricing.html'));
+});
+
 const TroubleshootingAI = require('./modules/troubleshooting/solver');
 const troubleshooting = new TroubleshootingAI();
 
@@ -256,7 +369,7 @@ app.get('/admin', (req, res) => {
 
 // Debug route
 app.get('/api/debug/users', (req, res) => {
-    const db = new sqlite3.Database('./data/may-ai.db');
+    const db = new sqlite3.Database(process.env.DATABASE_PATH || './data/may-ai.db');
     db.all('SELECT username FROM users', [], (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -266,6 +379,7 @@ app.get('/api/debug/users', (req, res) => {
     });
     db.close();
 });
+
 // Test route to see what queries Ollama generates
 app.get('/api/test-queries', async (req, res) => {
     const testDetails = {
@@ -284,7 +398,8 @@ app.get('/api/test-queries', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 app.listen(PORT, () => {
   console.log(`May AI Lab running at http://localhost:${PORT}`);
-
+  console.log(`Free tier: 3 websites per IP per day`);
 });
