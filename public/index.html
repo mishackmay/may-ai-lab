@@ -2,22 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>May AI Lab</title>
-<link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <nav class="navbar">
-    <div class="logo">May AI Lab</div>
-    <ul class="nav-links">
-        <li><a href="/">Home</a></li>
-        <li><a href="/website-gen">Website Generator</a></li>
-        <li><a href="/business">Business Dashboard</a></li>
-        <li><a href="/troubleshooting">Troubleshooting</a></li>
-        <li><a href="/face-auth">Face Login</a></li>
-        <li><a href="/pricing">Pricing</a></li>
-    </ul>
-</nav>
+        <div class="logo">May AI Lab</div>
+        <div class="mobile-menu" id="mobileMenu">☰</div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="/">Home</a></li>
+            <li><a href="/website-gen">Website Generator</a></li>
+            <li><a href="/business">Business Dashboard</a></li>
+            <li><a href="/troubleshooting">Troubleshooting</a></li>
+            <li><a href="/face-auth">Face Login</a></li>
+            <li><a href="/pricing">Pricing</a></li>
+        </ul>
+    </nav>
     
     <main>
         <section class="hero">
@@ -31,5 +32,16 @@
     </main>
     
     <script src="/js/main.js"></script>
+    <script>
+        // Mobile menu toggle
+        const mobileMenu = document.getElementById('mobileMenu');
+        const navLinks = document.getElementById('navLinks');
+        
+        if (mobileMenu) {
+            mobileMenu.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+            });
+        }
+    </script>
 </body>
 </html>
