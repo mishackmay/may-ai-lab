@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Website Generator - May AI Lab</title>
     <link rel="stylesheet" href="/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -153,6 +155,31 @@
             margin-top: 0;
         }
         
+        .logo-preview {
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo-preview img {
+            max-width: 80px;
+            max-height: 80px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 4px;
+        }
+        
+        .clear-logo-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
         .generate-btn {
             background: #667eea;
             color: white;
@@ -257,17 +284,19 @@
     </style>
 </head>
 <body>
-   <nav class="navbar">
-    <div class="logo">May AI Lab</div>
-    <ul class="nav-links">
-        <li><a href="/">Home</a></li>
-        <li><a href="/website-gen">Website Generator</a></li>
-        <li><a href="/business">Business Dashboard</a></li>
-        <li><a href="/troubleshooting">Troubleshooting</a></li>
-        <li><a href="/face-auth">Face Login</a></li>
-        <li><a href="/pricing">Pricing</a></li>
-    </ul>
-</nav>
+    <nav class="navbar">
+        <div class="logo">May AI Lab</div>
+        <div class="mobile-menu" id="mobileMenu">☰</div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="/">Home</a></li>
+            <li><a href="/website-gen">Website Generator</a></li>
+            <li><a href="/business">Business Dashboard</a></li>
+            <li><a href="/troubleshooting">Troubleshooting</a></li>
+            <li><a href="/face-auth">Face Login</a></li>
+            <li><a href="/pricing">Pricing</a></li>
+        </ul>
+    </nav>
+    <div class="nav-overlay" id="navOverlay"></div>
     
     <main>
         <div class="generator-container">
@@ -275,6 +304,17 @@
             <p>Fill in your business details below, or let AI generate them automatically.</p>
             
             <div class="generator-form">
+                <!-- Logo Upload -->
+                <div class="form-group">
+                    <label>🏢 Business Logo <span class="optional">(optional)</span></label>
+                    <input type="file" id="logoUpload" accept="image/png,image/jpeg,image/jpg">
+                    <div id="logoPreview" class="logo-preview" style="display: none;">
+                        <img id="previewImage" alt="Logo preview">
+                        <button type="button" class="clear-logo-btn" onclick="clearLogo()">Remove</button>
+                    </div>
+                    <div class="helper-text">Upload your logo (PNG or JPG). Leave blank for text logo.</div>
+                </div>
+                
                 <!-- Basic Info -->
                 <div class="form-group">
                     <label>🏢 Business Name <span class="optional">(required)</span></label>
@@ -398,51 +438,92 @@
     
     <script>
         let currentFiles = null;
+        let logoDataUrl = null;
+        
+        // Logo upload handler
+        const logoUpload = document.getElementById('logoUpload');
+        if (logoUpload) {
+            logoUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        logoDataUrl = event.target.result;
+                        const preview = document.getElementById('logoPreview');
+                        const previewImg = document.getElementById('previewImage');
+                        if (previewImg) previewImg.src = logoDataUrl;
+                        if (preview) preview.style.display = 'flex';
+                    };
+                    reader.readAsDataURL(file);
+                } else if (file) {
+                    alert('Please upload a PNG or JPG image');
+                    logoUpload.value = '';
+                }
+            });
+        }
+        
+        function clearLogo() {
+            logoDataUrl = null;
+            const logoUpload = document.getElementById('logoUpload');
+            const preview = document.getElementById('logoPreview');
+            if (logoUpload) logoUpload.value = '';
+            if (preview) preview.style.display = 'none';
+        }
         
         // Toggle for custom about section
-        document.getElementById('customAboutToggle').addEventListener('change', function() {
-            document.getElementById('customAboutSection').style.display = this.checked ? 'block' : 'none';
-        });
+        const aboutToggle = document.getElementById('customAboutToggle');
+        if (aboutToggle) {
+            aboutToggle.addEventListener('change', function() {
+                const section = document.getElementById('customAboutSection');
+                if (section) section.style.display = this.checked ? 'block' : 'none';
+            });
+        }
         
         // Toggle for custom service descriptions
-        document.getElementById('customServiceDescToggle').addEventListener('change', function() {
-            document.getElementById('customServiceDescSection').style.display = this.checked ? 'block' : 'none';
-            if (this.checked) {
-                updateServiceDescInputs();
-            }
-        });
+        const serviceDescToggle = document.getElementById('customServiceDescToggle');
+        if (serviceDescToggle) {
+            serviceDescToggle.addEventListener('change', function() {
+                const section = document.getElementById('customServiceDescSection');
+                if (section) section.style.display = this.checked ? 'block' : 'none';
+                if (this.checked) updateServiceDescInputs();
+            });
+        }
         
         function updateServiceDescInputs() {
             const services = getServices();
             const container = document.getElementById('serviceDescContainer');
-            container.innerHTML = services.map((service, index) => `
-                <div class="form-group" style="margin-bottom: 0.75rem;">
-                    <label>${service}:</label>
-                    <textarea class="service-desc-input" data-index="${index}" rows="2" placeholder="Describe ${service.toLowerCase()}..."></textarea>
-                </div>
-            `).join('');
+            if (container) {
+                container.innerHTML = services.map((service, index) => `
+                    <div class="form-group" style="margin-bottom: 0.75rem;">
+                        <label>${service}:</label>
+                        <textarea class="service-desc-input" data-index="${index}" rows="2" placeholder="Describe ${service.toLowerCase()}..."></textarea>
+                    </div>
+                `).join('');
+            }
         }
         
         function addService() {
             const container = document.getElementById('servicesContainer');
-            const newDiv = document.createElement('div');
-            newDiv.className = 'service-input';
-            newDiv.innerHTML = `
-                <input type="text" class="service-input-field" placeholder="New Service" value="New Service">
-                <button onclick="removeService(this)">×</button>
-            `;
-            container.appendChild(newDiv);
-            if (document.getElementById('customServiceDescToggle').checked) {
-                updateServiceDescInputs();
+            if (container) {
+                const newDiv = document.createElement('div');
+                newDiv.className = 'service-input';
+                newDiv.innerHTML = `
+                    <input type="text" class="service-input-field" placeholder="New Service" value="New Service">
+                    <button onclick="removeService(this)">×</button>
+                `;
+                container.appendChild(newDiv);
+                if (document.getElementById('customServiceDescToggle')?.checked) {
+                    updateServiceDescInputs();
+                }
             }
         }
         
         function removeService(btn) {
             const serviceDiv = btn.parentElement;
             const container = document.getElementById('servicesContainer');
-            if (container.children.length > 1) {
+            if (container && container.children.length > 1) {
                 serviceDiv.remove();
-                if (document.getElementById('customServiceDescToggle').checked) {
+                if (document.getElementById('customServiceDescToggle')?.checked) {
                     updateServiceDescInputs();
                 }
             } else {
@@ -456,7 +537,7 @@
         }
         
         function getServiceDescriptions() {
-            if (!document.getElementById('customServiceDescToggle').checked) return null;
+            if (!document.getElementById('customServiceDescToggle')?.checked) return null;
             const descs = document.querySelectorAll('.service-desc-input');
             const services = getServices();
             const result = {};
@@ -474,30 +555,34 @@
         const secondaryColor = document.getElementById('secondaryColor');
         const secondaryColorText = document.getElementById('secondaryColorText');
         
-        primaryColor.addEventListener('input', () => primaryColorText.value = primaryColor.value);
-        primaryColorText.addEventListener('input', () => primaryColor.value = primaryColorText.value);
-        secondaryColor.addEventListener('input', () => secondaryColorText.value = secondaryColor.value);
-        secondaryColorText.addEventListener('input', () => secondaryColor.value = secondaryColorText.value);
+        if (primaryColor && primaryColorText) {
+            primaryColor.addEventListener('input', () => primaryColorText.value = primaryColor.value);
+            primaryColorText.addEventListener('input', () => primaryColor.value = primaryColorText.value);
+        }
+        if (secondaryColor && secondaryColorText) {
+            secondaryColor.addEventListener('input', () => secondaryColorText.value = secondaryColor.value);
+            secondaryColorText.addEventListener('input', () => secondaryColor.value = secondaryColorText.value);
+        }
         
         async function generateWebsite() {
             // Collect all user inputs
             const userInputs = {
-                name: document.getElementById('businessName').value.trim(),
-                location: document.getElementById('location').value.trim(),
-                tagline: document.getElementById('tagline').value.trim(),
+                name: document.getElementById('businessName')?.value.trim() || '',
+                location: document.getElementById('location')?.value.trim() || '',
+                tagline: document.getElementById('tagline')?.value.trim() || '',
                 services: getServices(),
                 serviceDescriptions: getServiceDescriptions(),
-                primaryColor: document.getElementById('primaryColor').value,
-                secondaryColor: document.getElementById('secondaryColor').value,
-                businessType: document.getElementById('businessType').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                whatsapp: document.getElementById('whatsapp').value.trim(),
-                website: document.getElementById('website').value.trim(),
-                customAbout: document.getElementById('customAboutToggle').checked ? document.getElementById('customAbout').value.trim() : null
+                primaryColor: document.getElementById('primaryColor')?.value || '#8B4513',
+                secondaryColor: document.getElementById('secondaryColor')?.value || '#D2691E',
+                businessType: document.getElementById('businessType')?.value.trim() || '',
+                phone: document.getElementById('phone')?.value.trim() || '',
+                email: document.getElementById('email')?.value.trim() || '',
+                whatsapp: document.getElementById('whatsapp')?.value.trim() || '',
+                website: document.getElementById('website')?.value.trim() || '',
+                customAbout: document.getElementById('customAboutToggle')?.checked ? document.getElementById('customAbout')?.value.trim() : null,
+                logoDataUrl: logoDataUrl
             };
             
-            // Validate at least name
             if (!userInputs.name) {
                 alert('Please enter a Business Name');
                 return;
@@ -510,8 +595,10 @@
             if (userInputs.tagline) description += `Tagline: ${userInputs.tagline}. `;
             description += `Services: ${userInputs.services.join(', ')}. `;
             
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('preview').style.display = 'none';
+            const loading = document.getElementById('loading');
+            const preview = document.getElementById('preview');
+            if (loading) loading.style.display = 'block';
+            if (preview) preview.style.display = 'none';
             
             try {
                 const response = await fetch('/api/website/generate', {
@@ -524,17 +611,18 @@
                 
                 if (result.html) {
                     currentFiles = result;
-                    document.getElementById('previewFrame').src = result.html;
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('preview').style.display = 'block';
+                    const previewFrame = document.getElementById('previewFrame');
+                    if (previewFrame) previewFrame.src = result.html;
+                    if (loading) loading.style.display = 'none';
+                    if (preview) preview.style.display = 'block';
                 } else {
                     alert('Error generating website: ' + (result.error || 'Unknown error'));
-                    document.getElementById('loading').style.display = 'none';
+                    if (loading) loading.style.display = 'none';
                 }
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error connecting to server');
-                document.getElementById('loading').style.display = 'none';
+                if (loading) loading.style.display = 'none';
             }
         }
         
@@ -572,7 +660,9 @@
             }
         }
     </script>
-        <script>
+    
+    <!-- Mobile Menu Script -->
+    <script>
         const mobileMenu = document.getElementById('mobileMenu');
         const navLinks = document.getElementById('navLinks');
         const navOverlay = document.getElementById('navOverlay');
@@ -590,7 +680,9 @@
         
         if (mobileMenu) mobileMenu.addEventListener('click', toggleMenu);
         if (navOverlay) navOverlay.addEventListener('click', closeMenu);
-        if (navLinks) navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+        if (navLinks) {
+            navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+        }
     </script>
 </body>
 </html>

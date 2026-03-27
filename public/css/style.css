@@ -26,6 +26,18 @@ body {
 .logo {
     font-size: 1.2rem;
     font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Logo image styling */
+.logo img {
+    height: 35px;
+    width: auto;
+    max-height: 35px;
+    object-fit: contain;
+    vertical-align: middle;
 }
 
 /* Desktop navigation */
@@ -174,6 +186,11 @@ body {
         display: block;
         padding: 0.75rem 1rem;
         width: 100%;
+    }
+    
+    .logo img {
+        height: 30px;
+        max-height: 30px;
     }
     
     .hero {

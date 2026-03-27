@@ -561,8 +561,8 @@ Return ONLY a JSON array of 5 strings. No other text. No explanations.`;
         };
     }
 
- async generateModernHTML(details, filename) {
-    // Fetch only hero and about images (skip service images for now)
+async generateModernHTML(details, filename) {
+    // Fetch only hero and about images
     const [heroImage, aboutImage] = await Promise.all([
         this.getDynamicImage(details, "hero"),
         this.getDynamicImage(details, "about")
@@ -582,12 +582,23 @@ Return ONLY a JSON array of 5 strings. No other text. No explanations.`;
     const website = contact.website || '';
     const whatsappUrl = `https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}?text=Hi! I'm interested in ${encodeURIComponent(details.name)}`;
     
+    // Logo HTML (image or text)
+    const logoHtml = details.logoDataUrl 
+        ? `<img src="${details.logoDataUrl}" alt="${details.name}" style="height: 40px; width: auto; max-height: 40px;">` 
+        : `<i class="fas fa-${this.getIconForType(details.type)}"></i> ${details.name}`;
+    
+    // Favicon
+    const faviconHtml = details.logoDataUrl 
+        ? `<link rel="icon" type="image/png" href="${details.logoDataUrl}">` 
+        : `<link rel="icon" type="image/x-icon" href="/favicon.ico">`;
+    
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${details.name} | ${details.type}</title>
+    ${faviconHtml}
     <link rel="stylesheet" href="${filename}.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -596,7 +607,9 @@ Return ONLY a JSON array of 5 strings. No other text. No explanations.`;
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo"><i class="fas fa-${this.getIconForType(details.type)}"></i> ${details.name}</div>
+            <div class="logo">
+                ${logoHtml}
+            </div>
             <ul class="nav-links">
                 <li><a href="#home">Home</a></li>
                 <li><a href="#services">Services</a></li>
@@ -606,6 +619,7 @@ Return ONLY a JSON array of 5 strings. No other text. No explanations.`;
             <div class="mobile-menu"><i class="fas fa-bars"></i></div>
         </div>
     </nav>
+    <div class="nav-overlay" id="navOverlay"></div>
 
     <section id="home" class="hero" style="background: linear-gradient(135deg, ${details.primaryColor}cc, ${details.secondaryColor}cc), url('${heroImage}'); background-size: cover; background-position: center;">
         <div class="hero-content">
@@ -700,9 +714,11 @@ Return ONLY a JSON array of 5 strings. No other text. No explanations.`;
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="${filename}.js"></script>
-        <script>
-        const mobileMenu = document.getElementById('mobileMenu');
-        const navLinks = document.getElementById('navLinks');
+    <script>
+        AOS.init({ duration: 1000, once: true });
+        
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const navLinks = document.querySelector('.nav-links');
         const navOverlay = document.getElementById('navOverlay');
         
         function closeMenu() {
@@ -718,32 +734,39 @@ Return ONLY a JSON array of 5 strings. No other text. No explanations.`;
         
         if (mobileMenu) mobileMenu.addEventListener('click', toggleMenu);
         if (navOverlay) navOverlay.addEventListener('click', closeMenu);
-        if (navLinks) navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+        if (navLinks) {
+            navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+        }
     </script>
 </body>
 </html>`;
 }
 
     generateModernCSS(details) {
-        return `* {
+    return `* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
+
 body {
     font-family: 'Inter', sans-serif;
     line-height: 1.6;
     color: #1f2937;
+    overflow-x: hidden;
 }
+
+/* Navbar */
 .navbar {
     position: fixed;
     top: 0;
     width: 100%;
     background: white;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    z-index: 1000;
+    z-index: 1001;
     padding: 1rem 0;
 }
+
 .nav-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -751,34 +774,74 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
 }
+
 .logo {
     font-size: 1.5rem;
     font-weight: 700;
-    color: ${details.primaryColor};
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
+
+.logo img {
+    height: 40px;
+    width: auto;
+    max-height: 40px;
+    object-fit: contain;
+}
+
+.logo i {
+    font-size: 1.8rem;
+    color: ${details.primaryColor};
+}
+
 .nav-links {
     display: flex;
     list-style: none;
     gap: 2rem;
 }
+
 .nav-links a {
     text-decoration: none;
     color: #1f2937;
     font-weight: 500;
     transition: color 0.3s;
 }
+
 .nav-links a:hover {
     color: ${details.primaryColor};
 }
+
+/* Mobile menu button */
 .mobile-menu {
     display: none;
     font-size: 1.5rem;
     cursor: pointer;
+    background: none;
+    border: none;
+    color: #1f2937;
+    z-index: 1002;
 }
+
+/* Overlay for mobile menu */
+.nav-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+}
+
+.nav-overlay.active {
+    display: block;
+}
+
+/* Hero Section */
 .hero {
     min-height: 100vh;
     background-size: cover;
@@ -788,29 +851,51 @@ body {
     justify-content: center;
     text-align: center;
     padding: 8rem 2rem;
+    position: relative;
 }
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, ${details.primaryColor}cc, ${details.secondaryColor}cc);
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
 .hero-title {
     font-size: 4rem;
     font-weight: 800;
     margin-bottom: 1rem;
     color: white;
 }
+
 .hero-subtitle {
     font-size: 1.5rem;
     color: rgba(255,255,255,0.95);
     margin-bottom: 1rem;
 }
+
 .hero-description {
     font-size: 1.2rem;
     color: rgba(255,255,255,0.9);
     margin-bottom: 2rem;
 }
+
 .hero-buttons {
     display: flex;
     gap: 1rem;
     justify-content: center;
     flex-wrap: wrap;
 }
+
 .btn-primary {
     display: inline-block;
     padding: 1rem 2rem;
@@ -821,10 +906,12 @@ body {
     font-weight: 600;
     transition: all 0.3s;
 }
+
 .btn-primary:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
+
 .btn-whatsapp {
     display: inline-block;
     padding: 1rem 2rem;
@@ -835,91 +922,168 @@ body {
     font-weight: 600;
     transition: all 0.3s;
 }
-.services, .about, .contact {
-    padding: 6rem 2rem;
+
+.btn-whatsapp:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(37,211,102,0.3);
 }
+
+.hero-wave {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    z-index: 2;
+}
+
+/* Services Section */
+.services {
+    padding: 6rem 2rem;
+    background: #f9fafb;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
 }
+
 .section-header {
     text-align: center;
     margin-bottom: 4rem;
 }
+
 .section-header h2 {
     font-size: 2.5rem;
     margin-bottom: 1rem;
+    color: #1f2937;
 }
+
+.section-header p {
+    color: #6b7280;
+}
+
 .services-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 2rem;
 }
+
 .service-card {
+    background: white;
+    padding: 2rem;
     border-radius: 1rem;
-    overflow: hidden;
-    transition: transform 0.3s;
+    text-align: center;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
+
 .service-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
-.service-overlay {
-    min-height: 300px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
+
 .service-icon {
     width: 70px;
     height: 70px;
-    background: rgba(255,255,255,0.2);
+    background: ${details.primaryColor}10;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.5rem;
 }
+
 .service-icon i {
     font-size: 1.8rem;
-    color: white;
+    color: ${details.primaryColor};
 }
+
+.service-card h3 {
+    margin-bottom: 1rem;
+    color: #1f2937;
+}
+
+.service-card p {
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+/* About Section */
+.about {
+    padding: 6rem 2rem;
+    background: white;
+}
+
 .about-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 4rem;
     align-items: center;
 }
+
+.about-text h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: #1f2937;
+}
+
+.about-text p {
+    color: #6b7280;
+    margin-bottom: 1rem;
+    line-height: 1.8;
+}
+
 .about-stats {
     display: flex;
     gap: 2rem;
     margin-top: 2rem;
 }
+
+.stat {
+    text-align: center;
+}
+
 .stat-number {
     font-size: 2rem;
     font-weight: 700;
     color: ${details.primaryColor};
 }
+
+.stat-label {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
 .about-image img {
     width: 100%;
     border-radius: 1rem;
+    box-shadow: 0 20px 30px rgba(0,0,0,0.1);
 }
+
+/* Contact Section */
+.contact {
+    padding: 6rem 2rem;
+    background: #f9fafb;
+}
+
 .contact-wrapper {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 4rem;
 }
+
 .contact-info {
     display: flex;
     flex-direction: column;
     gap: 2rem;
 }
+
 .info-item {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
+
 .info-item i {
     width: 50px;
     height: 50px;
@@ -931,66 +1095,155 @@ body {
     font-size: 1.2rem;
     color: ${details.primaryColor};
 }
+
+.info-item h4 {
+    margin-bottom: 0.25rem;
+    color: #1f2937;
+}
+
+.info-item p {
+    color: #6b7280;
+}
+
 .contact-form {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
+
 .contact-form input,
 .contact-form textarea {
     padding: 1rem;
     border: 2px solid #e5e7eb;
     border-radius: 0.5rem;
+    font-family: inherit;
 }
+
 .contact-form input:focus,
 .contact-form textarea:focus {
     outline: none;
     border-color: ${details.primaryColor};
 }
+
+/* Footer */
 .footer {
     background: #1f2937;
     color: white;
     padding: 4rem 2rem 2rem;
 }
+
 .footer-content {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem;
     margin-bottom: 2rem;
 }
+
+.footer-section h3 {
+    margin-bottom: 1rem;
+}
+
+.footer-section ul {
+    list-style: none;
+}
+
+.footer-section ul li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-section ul li a {
+    color: #9ca3af;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-section ul li a:hover {
+    color: white;
+}
+
 .social-links {
     display: flex;
     gap: 1rem;
 }
+
 .social-links a {
     color: white;
     font-size: 1.5rem;
     transition: color 0.3s;
 }
+
 .social-links a:hover {
     color: ${details.primaryColor};
+    transform: translateY(-3px);
 }
+
 .footer-bottom {
     text-align: center;
     padding-top: 2rem;
     border-top: 1px solid #374151;
+    color: #9ca3af;
 }
+
+/* Mobile Responsive */
 @media (max-width: 768px) {
-    .nav-links {
-        display: none;
+    .navbar {
+        padding: 1rem;
     }
+    
     .mobile-menu {
         display: block;
     }
+    
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        gap: 0;
+        background: white;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        padding: 1rem 0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        z-index: 1000;
+    }
+    
+    .nav-links.active {
+        display: flex;
+    }
+    
+    .nav-links li {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .nav-links a {
+        display: block;
+        padding: 0.75rem 1rem;
+    }
+    
     .hero-title {
         font-size: 2.5rem;
     }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+    
     .about-content,
     .contact-wrapper {
         grid-template-columns: 1fr;
     }
-}`;
+    
+    .services-grid {
+        grid-template-columns: 1fr;
     }
+    
+    .about-stats {
+        justify-content: center;
+    }
+}`;
+}
 
     generateModernJS(details) {
         return `AOS.init({ duration: 1000, once: true });
