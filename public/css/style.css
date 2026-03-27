@@ -40,6 +40,13 @@ body {
     vertical-align: middle;
 }
 
+@media (max-width: 768px) {
+    .logo img {
+        height: 30px;
+        max-height: 30px;
+    }
+}
+
 /* Desktop navigation */
 .nav-links {
     display: flex;
