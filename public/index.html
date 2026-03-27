@@ -38,28 +38,21 @@
         const navLinks = document.getElementById('navLinks');
         const navOverlay = document.getElementById('navOverlay');
         
-        function toggleMenu() {
-            navLinks.classList.toggle('active');
-            if (navOverlay) navOverlay.classList.toggle('active');
-        }
-        
         function closeMenu() {
-            navLinks.classList.remove('active');
+            if (navLinks) navLinks.classList.remove('active');
             if (navOverlay) navOverlay.classList.remove('active');
         }
         
-        if (mobileMenu) {
-            mobileMenu.addEventListener('click', toggleMenu);
+        function toggleMenu(e) {
+            if (e) e.stopPropagation();
+            if (navLinks) navLinks.classList.toggle('active');
+            if (navOverlay) navOverlay.classList.toggle('active');
         }
         
-        if (navOverlay) {
-            navOverlay.addEventListener('click', closeMenu);
-        }
-        
+        if (mobileMenu) mobileMenu.addEventListener('click', toggleMenu);
+        if (navOverlay) navOverlay.addEventListener('click', closeMenu);
         if (navLinks) {
-            navLinks.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', closeMenu);
-            });
+            navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
         }
     </script>
 </body>

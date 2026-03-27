@@ -362,5 +362,25 @@
         <p>&copy; 2024 May AI Lab | 🇿🇦 Built in South Africa</p>
         <p style="font-size: 0.8rem; margin-top: 0.5rem;">You download, you host, you own.</p>
     </footer>
+        <script>
+        const mobileMenu = document.getElementById('mobileMenu');
+        const navLinks = document.getElementById('navLinks');
+        const navOverlay = document.getElementById('navOverlay');
+        
+        function closeMenu() {
+            if (navLinks) navLinks.classList.remove('active');
+            if (navOverlay) navOverlay.classList.remove('active');
+        }
+        
+        function toggleMenu(e) {
+            if (e) e.stopPropagation();
+            if (navLinks) navLinks.classList.toggle('active');
+            if (navOverlay) navOverlay.classList.toggle('active');
+        }
+        
+        if (mobileMenu) mobileMenu.addEventListener('click', toggleMenu);
+        if (navOverlay) navOverlay.addEventListener('click', closeMenu);
+        if (navLinks) navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+    </script>
 </body>
 </html>
