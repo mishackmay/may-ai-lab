@@ -52,7 +52,9 @@ class WebsiteGenerator {
                     website: userInputs.website || ''
                 },
                 customAbout: userInputs.customAbout || null,
-                serviceDescriptions: userInputs.serviceDescriptions || null
+                serviceDescriptions: userInputs.serviceDescriptions || null,
+                customHeroImage: userInputs?.customHeroImage || null,
+                customAboutImage: userInputs?.customAboutImage || null
             };
         }
         
@@ -562,11 +564,9 @@ Return ONLY a JSON array of 5 strings. No other text. No explanations.`;
     }
 
 async generateModernHTML(details, filename) {
-    // Fetch only hero and about images
-    const [heroImage, aboutImage] = await Promise.all([
-        this.getDynamicImage(details, "hero"),
-        this.getDynamicImage(details, "about")
-    ]);
+    // Use custom images if provided, otherwise fetch from AI
+    const heroImage = details.customHeroImage || await this.getDynamicImage(details, "hero");
+    const aboutImage = details.customAboutImage || await this.getDynamicImage(details, "about");
     
     const getServiceDescription = (service) => {
         if (details.serviceDescriptions && details.serviceDescriptions[service]) {

@@ -281,6 +281,31 @@
         .advanced-section.show {
             display: block;
         }
+        .image-preview {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.image-preview img {
+    border: 1px solid #e5e7eb;
+    padding: 4px;
+    background: white;
+    max-width: 80px;
+    max-height: 80px;
+    border-radius: 8px;
+}
+
+.clear-image-btn {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
     </style>
 </head>
 <body>
@@ -314,7 +339,27 @@
                     </div>
                     <div class="helper-text">Upload your logo (PNG or JPG). Leave blank for text logo.</div>
                 </div>
-                
+                <!-- Custom Images Section -->
+<div class="section-title">🖼️ Custom Images (Optional)</div>
+<div class="helper-text">Upload your own images. Leave blank to use AI-generated images.</div>
+
+<div class="form-group">
+    <label>Hero Image <span class="optional">(main banner)</span></label>
+    <input type="file" id="heroImageUpload" accept="image/*">
+    <div id="heroImagePreview" class="image-preview" style="display: none;">
+        <img id="heroPreviewImg">
+        <button type="button" class="clear-image-btn" onclick="clearHeroImage()">Remove</button>
+    </div>
+</div>
+
+<div class="form-group">
+    <label>About Section Image</label>
+    <input type="file" id="aboutImageUpload" accept="image/*">
+    <div id="aboutImagePreview" class="image-preview" style="display: none;">
+        <img id="aboutPreviewImg">
+        <button type="button" class="clear-image-btn" onclick="clearAboutImage()">Remove</button>
+    </div>
+</div>
                 <!-- Basic Info -->
                 <div class="form-group">
                     <label>🏢 Business Name <span class="optional">(required)</span></label>
@@ -439,6 +484,8 @@
     <script>
         let currentFiles = null;
         let logoDataUrl = null;
+        let customHeroImage = null;
+         let customAboutImage = null;
         
         // Logo upload handler
         const logoUpload = document.getElementById('logoUpload');
@@ -469,6 +516,57 @@
             if (logoUpload) logoUpload.value = '';
             if (preview) preview.style.display = 'none';
         }
+        // Hero image upload handler
+const heroUpload = document.getElementById('heroImageUpload');
+if (heroUpload) {
+    heroUpload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                customHeroImage = event.target.result;
+                document.getElementById('heroPreviewImg').src = customHeroImage;
+                document.getElementById('heroImagePreview').style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+        } else if (file) {
+            alert('Please upload a PNG or JPG image');
+            this.value = '';
+        }
+    });
+}
+
+function clearHeroImage() {
+    customHeroImage = null;
+    document.getElementById('heroImageUpload').value = '';
+    document.getElementById('heroImagePreview').style.display = 'none';
+}
+
+// About image upload handler
+const aboutUpload = document.getElementById('aboutImageUpload');
+if (aboutUpload) {
+    aboutUpload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                customAboutImage = event.target.result;
+                document.getElementById('aboutPreviewImg').src = customAboutImage;
+                document.getElementById('aboutImagePreview').style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+        } else if (file) {
+            alert('Please upload a PNG or JPG image');
+            this.value = '';
+        }
+    });
+}
+
+function clearAboutImage() {
+    customAboutImage = null;
+    document.getElementById('aboutImageUpload').value = '';
+    document.getElementById('aboutImagePreview').style.display = 'none';
+}
         
         // Toggle for custom about section
         const aboutToggle = document.getElementById('customAboutToggle');
@@ -580,7 +678,9 @@
                 whatsapp: document.getElementById('whatsapp')?.value.trim() || '',
                 website: document.getElementById('website')?.value.trim() || '',
                 customAbout: document.getElementById('customAboutToggle')?.checked ? document.getElementById('customAbout')?.value.trim() : null,
-                logoDataUrl: logoDataUrl
+                logoDataUrl: logoDataUrl,
+                customHeroImage: customHeroImage,
+                customAboutImage: customAboutImage
             };
             
             if (!userInputs.name) {
