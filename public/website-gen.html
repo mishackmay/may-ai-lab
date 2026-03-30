@@ -295,6 +295,8 @@
     max-width: 80px;
     max-height: 80px;
     border-radius: 8px;
+    object-fit: cover;
+
 }
 
 .clear-image-btn {
@@ -305,6 +307,11 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.8rem;
+}
+.image-preview img {
+    max-width: 80px;
+    max-height: 80px;
+    object-fit: cover;
 }
     </style>
 </head>
@@ -347,8 +354,8 @@
     <label>Hero Image <span class="optional">(main banner)</span></label>
     <input type="file" id="heroImageUpload" accept="image/*">
     <div id="heroImagePreview" class="image-preview" style="display: none;">
-        <img id="heroPreviewImg">
-        <button type="button" class="clear-image-btn" onclick="clearHeroImage()">Remove</button>
+    <img id="heroPreviewImg" style="max-width: 80px; max-height: 80px; border-radius: 8px;">    
+    <button type="button" class="clear-image-btn" onclick="clearHeroImage()">Remove</button>
     </div>
 </div>
 
@@ -356,8 +363,8 @@
     <label>About Section Image</label>
     <input type="file" id="aboutImageUpload" accept="image/*">
     <div id="aboutImagePreview" class="image-preview" style="display: none;">
-        <img id="aboutPreviewImg">
-        <button type="button" class="clear-image-btn" onclick="clearAboutImage()">Remove</button>
+    <img id="aboutPreviewImg" style="max-width: 80px; max-height: 80px; border-radius: 8px;">
+    <button type="button" class="clear-image-btn" onclick="clearAboutImage()">Remove</button>
     </div>
 </div>
                 <!-- Basic Info -->
@@ -482,10 +489,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     
     <script>
-        let currentFiles = null;
-        let logoDataUrl = null;
-        let customHeroImage = null;
-         let customAboutImage = null;
+    let currentFiles = null;
+    let logoDataUrl = null;
+    let customHeroImage = null;
+    let customAboutImage = null;
         
         // Logo upload handler
         const logoUpload = document.getElementById('logoUpload');
