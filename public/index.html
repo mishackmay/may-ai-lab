@@ -8,18 +8,19 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="logo">May AI Lab</div>
-        <div class="mobile-menu" id="mobileMenu">☰</div>
-        <ul class="nav-links" id="navLinks">
-            <li><a href="/">Home</a></li>
-            <li><a href="/website-gen">Website Generator</a></li>
-            <li><a href="/business">Business Dashboard</a></li>
-            <li><a href="/troubleshooting">Troubleshooting</a></li>
-            <li><a href="/face-auth">Face Login</a></li>
-            <li><a href="/pricing">Pricing</a></li>
-        </ul>
-    </nav>
-    <div class="nav-overlay" id="navOverlay"></div>
+    <div class="logo">May AI Lab</div>
+    <button class="mobile-menu" id="mobileMenu">☰</button>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="/">Home</a></li>
+        <li><a href="/website-gen">Website Generator</a></li>
+        <li><a href="/business">Dashboard</a></li>
+        <li><a href="/business-setup">Booking Setup</a></li>
+        <li><a href="/my-websites">My Websites</a></li>
+        <li><a href="/pricing">Pricing</a></li>
+        <li><a href="/login">Login</a></li>
+    </ul>
+</nav>
+<div class="nav-overlay" id="navOverlay"></div>
     
     <main>
         <section class="hero">
@@ -55,5 +56,29 @@
             navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
         }
     </script>
+    <script>
+    document.getElementById('mobileMenu').addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('active');
+    });
+</script>
+
+<!-- Auth logout script (add this) -->
+<script>
+    fetch('/api/auth/me')
+        .then(r => r.json())
+        .then(data => {
+            const authLink = document.getElementById('authLink');
+            if (data.loggedIn) {
+                authLink.innerHTML = '<a href="#" onclick="logout()">Logout</a>';
+            } else {
+                authLink.innerHTML = '<a href="/login">Login</a>';
+            }
+        });
+    
+    function logout() {
+        fetch('/api/auth/logout', { method: 'POST' })
+            .then(() => window.location.href = '/');
+    }
+</script>
 </body>
 </html>

@@ -1,795 +1,1237 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Website Generator - May AI Lab</title>
     <link rel="stylesheet" href="/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --brand: #1a6b4a;
+            --brand-light: #e8f5ee;
+            --brand-mid: #2d9467;
+            --accent: #f59e0b;
+            --accent-light: #fef3c7;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --bg: #f7f9f7;
+            --white: #ffffff;
+            --radius: 14px;
+            --shadow: 0 4px 24px rgba(26,107,74,0.08);
         }
-        
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: #f9fafb;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
         }
-        
-        .generator-container {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 2rem;
+
+        /* ── NAV ── */
+        .navbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        
-        .generator-form {
-            background: white;
-            padding: 2rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            margin-top: 2rem;
+        .logo {
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--brand);
+            letter-spacing: -0.5px;
         }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #1f2937;
-        }
-        
-        .form-group label .optional {
-            font-weight: normal;
-            font-size: 0.8rem;
-            color: #6b7280;
-            margin-left: 0.5rem;
-        }
-        
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 2px solid #e5e7eb;
+        .nav-links { display: flex; list-style: none; gap: 0.25rem; }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
             border-radius: 8px;
-            font-family: inherit;
-            font-size: 0.95rem;
             transition: all 0.2s;
         }
-        
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        .nav-links a:hover { background: var(--brand-light); color: var(--brand); }
+        .mobile-menu { display: none; font-size: 1.5rem; cursor: pointer; background: none; border: none; }
+        .nav-overlay { display: none; }
+
+        /* ── PAGE LAYOUT ── */
+        .page-wrap {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 4rem;
         }
-        
-        .checkbox-group {
+
+        /* ── HERO HEADER ── */
+        .page-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        .page-header .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--brand-light);
+            color: var(--brand);
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.35rem 0.9rem;
+            border-radius: 99px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+        .page-header h1 {
+            font-family: 'Lora', serif;
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.25;
+            margin-bottom: 0.75rem;
+        }
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        /* ── PROGRESS ── */
+        .progress-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 2rem;
+        }
+        .step-dot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            position: relative;
+        }
+        .step-dot .dot {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            transition: all 0.3s;
+            position: relative;
+            z-index: 1;
+        }
+        .step-dot.active .dot {
+            background: var(--brand);
+            border-color: var(--brand);
+            color: white;
+            box-shadow: 0 0 0 4px var(--brand-light);
+        }
+        .step-dot.done .dot {
+            background: var(--brand-mid);
+            border-color: var(--brand-mid);
+            color: white;
+        }
+        .step-dot .label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        .step-dot.active .label { color: var(--brand); }
+        .step-line {
+            height: 2px;
+            width: 60px;
+            background: var(--border);
+            margin-bottom: 1.2rem;
+            transition: background 0.3s;
+        }
+        .step-line.done { background: var(--brand-mid); }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(26,107,74,0.06);
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 1.75rem 2rem 0;
+        }
+        .card-header .step-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--brand);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 0.4rem;
+        }
+        .card-header h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.4rem;
+        }
+        .card-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .card-body { padding: 1.75rem 2rem; }
+
+        /* ── FORM ELEMENTS ── */
+        .field { margin-bottom: 1.25rem; }
+        .field:last-child { margin-bottom: 0; }
+        .field label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.45rem;
+        }
+        .field label .opt {
+            font-weight: 400;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        .field input,
+        .field textarea,
+        .field select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text);
+            background: var(--white);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .field input:focus,
+        .field textarea:focus,
+        .field select:focus {
+            outline: none;
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px var(--brand-light);
+        }
+        .field input::placeholder,
+        .field textarea::placeholder { color: #c4cdd5; }
+        .field .hint {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
+
+        /* ── TWO COL ── */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+        /* ── BUSINESS TYPE TILES ── */
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .type-tile {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 0.9rem 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--white);
+        }
+        .type-tile:hover { border-color: var(--brand-mid); background: var(--brand-light); }
+        .type-tile.selected { border-color: var(--brand); background: var(--brand-light); }
+        .type-tile .icon { font-size: 1.6rem; display: block; margin-bottom: 0.35rem; }
+        .type-tile .name { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+        .type-tile.selected .name { color: var(--brand); }
+
+        /* ── SERVICES ── */
+        .services-list { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 0.75rem; }
+        .service-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .service-row input { flex: 1; }
+        .remove-service {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        .remove-service:hover { background: #fecaca; }
+        .add-service-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: none;
+            border: 2px dashed var(--brand-mid);
+            color: var(--brand);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.55rem 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .add-service-btn:hover { background: var(--brand-light); }
+
+        /* ── COLOR PICKER ── */
+        .color-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .color-swatch {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .color-swatch input[type="color"] {
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            background: none;
+        }
+        .color-row .field { flex: 1; margin-bottom: 0; }
+
+        /* ── COLOR NAME INPUT ── */
+        .color-name-row {
             display: flex;
             align-items: center;
             gap: 0.75rem;
         }
-        
-        .checkbox-group input {
-            width: auto;
-            margin: 0;
-        }
-        
-        .services-grid-input {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-        
-        .service-input {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        
-        .service-input input {
-            flex: 1;
-        }
-        
-        .service-input button {
-            background: #ef4444;
-            color: white;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-        
-        .add-service-btn {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-        }
-        
-        .color-row {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-        
-        .color-row input[type="color"] {
-            width: 50px;
-            height: 40px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        
-        .color-row input[type="text"] {
-            flex: 1;
-        }
-        
-        .contact-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-        
-        .section-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin: 1.5rem 0 1rem 0;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
-        .section-title:first-of-type {
-            margin-top: 0;
-        }
-        
-        .logo-preview {
-            margin-top: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .logo-preview img {
-            max-width: 80px;
-            max-height: 80px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            padding: 4px;
-        }
-        
-        .clear-logo-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        
-        .generate-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
+        .color-live-swatch {
+            width: 44px;
+            height: 44px;
             border-radius: 10px;
+            border: 2px solid var(--border);
+            flex-shrink: 0;
+            transition: background 0.3s;
+            background: #e5e7eb;
+        }
+        .color-name-row input[type="text"] { flex: 1; }
+        .quick-colors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .qc-tile {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
+            border: 3px solid transparent;
+            transition: transform 0.15s, border-color 0.15s;
+            position: relative;
+        }
+        .qc-tile:hover { transform: scale(1.15); }
+        .qc-tile.active-primary { border-color: #000; transform: scale(1.15); }
+
+        /* ── UPLOAD AREA ── */
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .upload-area:hover { border-color: var(--brand-mid); background: var(--brand-light); }
+        .upload-area input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
             width: 100%;
-            transition: all 0.3s;
-            margin-top: 1rem;
+            height: 100%;
         }
-        
-        .generate-btn:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        .upload-area .icon { font-size: 1.8rem; display: block; margin-bottom: 0.4rem; }
+        .upload-area p { font-size: 0.85rem; color: var(--text-muted); }
+        .upload-area p strong { color: var(--brand); }
+        .image-preview-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
         }
-        
-        .preview-container {
-            margin-top: 2rem;
-            border-radius: 16px;
-            background: white;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        .image-preview-row img {
+            width: 64px;
+            height: 64px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid var(--border);
         }
-        
-        .preview-header {
+        .clear-btn {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* ── OPTIONAL TOGGLE ── */
+        .optional-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.85rem 1rem;
+            background: var(--bg);
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 0.75rem;
+        }
+        .optional-toggle:hover { border-color: var(--brand-mid); }
+        .optional-toggle input[type="checkbox"] { width: auto; accent-color: var(--brand); width: 16px; height: 16px; cursor: pointer; }
+        .optional-toggle span { font-size: 0.875rem; font-weight: 500; color: var(--text); }
+        .collapsible { display: none; margin-top: 0.5rem; }
+        .collapsible.open { display: block; }
+
+        /* ── CARD FOOTER / BUTTONS ── */
+        .card-footer {
+            padding: 1.25rem 2rem;
+            border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 1.5rem;
-            background: #f3f4f6;
-            border-bottom: 1px solid #e5e7eb;
+            background: #fafafa;
         }
-        
-        .download-btn {
-            background: #10b981;
+        .btn-back {
+            background: none;
+            border: 2px solid var(--border);
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.7rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-back:hover { border-color: var(--brand); color: var(--brand); }
+        .btn-next {
+            background: var(--brand);
             color: white;
             border: none;
-            padding: 0.5rem 1.5rem;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 700;
+            padding: 0.8rem 2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-next:hover { background: var(--brand-mid); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,107,74,0.25); }
+        .btn-generate {
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-mid) 100%);
+            color: white;
+            border: none;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 0.9rem 2.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 16px rgba(26,107,74,0.3);
+        }
+        .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,107,74,0.4); }
+
+        /* ── STEP PANELS ── */
+        .step-panel { display: none; }
+        .step-panel.active { display: block; }
+
+        /* ── LOADING ── */
+        .loading-wrap {
+            display: none;
+            text-align: center;
+            padding: 3rem 2rem;
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        .loading-wrap.show { display: block; }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--brand-light);
+            border-top-color: var(--brand);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin: 0 auto 1.25rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-wrap h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .loading-wrap p { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* ── PREVIEW ── */
+        .preview-wrap {
+            display: none;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        .preview-wrap.show { display: block; }
+        .preview-bar {
+            background: var(--white);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .preview-bar span { font-weight: 700; font-size: 0.95rem; }
+        .btn-download {
+            background: var(--accent);
+            color: #1c1400;
+            border: none;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 700;
+            padding: 0.6rem 1.25rem;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
+            transition: all 0.2s;
         }
-        
-        .preview-frame {
-            width: 100%;
-            height: 550px;
-            border: none;
-        }
-        
-        .loading {
+        .btn-download:hover { background: #f59e0b; transform: translateY(-1px); }
+        .preview-frame { width: 100%; height: 560px; border: none; display: block; }
+        .preview-hint {
+            background: var(--bg);
+            padding: 0.85rem;
             text-align: center;
-            padding: 2rem;
-            display: none;
+            font-size: 0.82rem;
+            color: var(--text-muted);
         }
-        
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .helper-text {
-            font-size: 0.8rem;
-            color: #6b7280;
-            margin-top: 0.5rem;
-        }
-        
-        .toggle-advanced {
+        .btn-restart {
             background: none;
             border: none;
-            color: #667eea;
+            color: var(--brand);
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 0.9rem;
+            text-decoration: underline;
             margin-top: 0.5rem;
-            padding: 0;
         }
-        
-        .advanced-section {
-            display: none;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px dashed #e5e7eb;
+
+        /* ── MOBILE ── */
+        @media (max-width: 640px) {
+            .two-col { grid-template-columns: 1fr; }
+            .type-grid { grid-template-columns: repeat(3, 1fr); }
+            .page-header h1 { font-size: 1.75rem; }
+            .card-body { padding: 1.25rem; }
+            .card-header { padding: 1.25rem 1.25rem 0; }
+            .card-footer { padding: 1rem 1.25rem; }
+            .step-line { width: 32px; }
+            .nav-links { display: none; flex-direction: column; position: absolute; top: 64px; left: 0; width: 100%; background: white; padding: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 99; }
+            .nav-links.active { display: flex; }
+            .mobile-menu { display: block; }
         }
-        
-        .advanced-section.show {
-            display: block;
-        }
-        .image-preview {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-}
-
-.image-preview img {
-    border: 1px solid #e5e7eb;
-    padding: 4px;
-    background: white;
-    max-width: 80px;
-    max-height: 80px;
-    border-radius: 8px;
-    object-fit: cover;
-
-}
-
-.clear-image-btn {
-    background: #ef4444;
-    color: white;
-    border: none;
-    padding: 0.25rem 0.75rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-}
-.image-preview img {
-    max-width: 80px;
-    max-height: 80px;
-    object-fit: cover;
-}
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo">May AI Lab</div>
-        <div class="mobile-menu" id="mobileMenu">☰</div>
-        <ul class="nav-links" id="navLinks">
-            <li><a href="/">Home</a></li>
-            <li><a href="/website-gen">Website Generator</a></li>
-            <li><a href="/business">Business Dashboard</a></li>
-            <li><a href="/troubleshooting">Troubleshooting</a></li>
-            <li><a href="/face-auth">Face Login</a></li>
-            <li><a href="/pricing">Pricing</a></li>
-        </ul>
-    </nav>
-    <div class="nav-overlay" id="navOverlay"></div>
-    
-    <main>
-        <div class="generator-container">
-            <h1>🌐 AI Website Generator</h1>
-            <p>Fill in your business details below, or let AI generate them automatically.</p>
-            
-            <div class="generator-form">
-                <!-- Logo Upload -->
-                <div class="form-group">
-                    <label>🏢 Business Logo <span class="optional">(optional)</span></label>
-                    <input type="file" id="logoUpload" accept="image/png,image/jpeg,image/jpg">
-                    <div id="logoPreview" class="logo-preview" style="display: none;">
-                        <img id="previewImage" alt="Logo preview">
-                        <button type="button" class="clear-logo-btn" onclick="clearLogo()">Remove</button>
-                    </div>
-                    <div class="helper-text">Upload your logo (PNG or JPG). Leave blank for text logo.</div>
-                </div>
-                <!-- Custom Images Section -->
-<div class="section-title">🖼️ Custom Images (Optional)</div>
-<div class="helper-text">Upload your own images. Leave blank to use AI-generated images.</div>
 
-<div class="form-group">
-    <label>Hero Image <span class="optional">(main banner)</span></label>
-    <input type="file" id="heroImageUpload" accept="image/*">
-    <div id="heroImagePreview" class="image-preview" style="display: none;">
-    <img id="heroPreviewImg" style="max-width: 80px; max-height: 80px; border-radius: 8px;">    
-    <button type="button" class="clear-image-btn" onclick="clearHeroImage()">Remove</button>
-    </div>
-</div>
+<nav class="navbar">
+    <div class="logo">May AI Lab</div>
+    <button class="mobile-menu" id="mobileMenu">☰</button>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="/">Home</a></li>
+        <li><a href="/website-gen">Website Generator</a></li>
+        <li><a href="/business">Dashboard</a></li>
+        <li><a href="/business-setup">Booking Setup</a></li>
+        <li><a href="/my-websites">My Websites</a></li>
+        <li><a href="/pricing">Pricing</a></li>
+        <li><a href="/login">Login</a></li>
+    </ul>
+</nav>
+<div class="nav-overlay" id="navOverlay"></div>
 
-<div class="form-group">
-    <label>About Section Image</label>
-    <input type="file" id="aboutImageUpload" accept="image/*">
-    <div id="aboutImagePreview" class="image-preview" style="display: none;">
-    <img id="aboutPreviewImg" style="max-width: 80px; max-height: 80px; border-radius: 8px;">
-    <button type="button" class="clear-image-btn" onclick="clearAboutImage()">Remove</button>
+<main>
+<div class="page-wrap">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="badge">✨ AI Powered</div>
+        <h1>Build your business website in minutes</h1>
+        <p>Answer a few simple questions — our AI handles the rest. No technical skills needed.</p>
     </div>
-</div>
-                <!-- Basic Info -->
-                <div class="form-group">
-                    <label>🏢 Business Name <span class="optional">(required)</span></label>
-                    <input type="text" id="businessName" placeholder="e.g., Morning Brew Coffee">
+
+    <!-- Progress -->
+    <div class="progress-wrap" id="progressBar">
+        <div class="step-dot active" id="dot-1"><div class="dot">1</div><div class="label">Business</div></div>
+        <div class="step-line" id="line-1"></div>
+        <div class="step-dot" id="dot-2"><div class="dot">2</div><div class="label">Services</div></div>
+        <div class="step-line" id="line-2"></div>
+        <div class="step-dot" id="dot-3"><div class="dot">3</div><div class="label">Contact</div></div>
+        <div class="step-line" id="line-3"></div>
+        <div class="step-dot" id="dot-4"><div class="dot">4</div><div class="label">Style</div></div>
+        <div class="step-line" id="line-4"></div>
+        <div class="step-dot" id="dot-5"><div class="dot">5</div><div class="label">Finish</div></div>
+    </div>
+
+    <!-- ══ STEP 1: Business Info ══ -->
+    <div class="step-panel active" id="step-1">
+        <div class="card">
+            <div class="card-header">
+                <div class="step-label">Step 1 of 5</div>
+                <h2>Tell us about your business 🏢</h2>
+                <p>Just the basics — what's your business called and where are you?</p>
+            </div>
+            <div class="card-body">
+                <div class="field">
+                    <label>Business Name <span class="opt">(required)</span></label>
+                    <input type="text" id="businessName" placeholder="e.g., Thabo's Hair Salon">
                 </div>
-                
-                <div class="form-group">
-                    <label>📍 Location <span class="optional">(required)</span></label>
-                    <input type="text" id="location" placeholder="e.g., Cape Town, South Africa">
+                <div class="field">
+                    <label>Where are you based? <span class="opt">(required)</span></label>
+                    <input type="text" id="location" placeholder="e.g., Soweto, Johannesburg">
                 </div>
-                
-                <div class="form-group">
-                    <label>✨ Tagline / Slogan <span class="optional">(optional - AI will generate if blank)</span></label>
-                    <input type="text" id="tagline" placeholder="Leave blank for AI to generate">
+                <div class="field">
+                    <label>What type of business is this?</label>
+                    <div class="type-grid" id="typeGrid">
+                        <div class="type-tile" data-type="Hair Salon"><span class="icon">💇</span><span class="name">Hair Salon</span></div>
+                        <div class="type-tile" data-type="Restaurant"><span class="icon">🍽️</span><span class="name">Restaurant</span></div>
+                        <div class="type-tile" data-type="Gym"><span class="icon">💪</span><span class="name">Gym</span></div>
+                        <div class="type-tile" data-type="Spaza Shop"><span class="icon">🛒</span><span class="name">Spaza Shop</span></div>
+                        <div class="type-tile" data-type="Cleaning Service"><span class="icon">🧹</span><span class="name">Cleaning</span></div>
+                        <div class="type-tile" data-type="Tech Company"><span class="icon">💻</span><span class="name">Tech</span></div>
+                        <div class="type-tile" data-type="Coffee Shop"><span class="icon">☕</span><span class="name">Coffee Shop</span></div>
+                        <div class="type-tile" data-type="Real Estate"><span class="icon">🏠</span><span class="name">Real Estate</span></div>
+                        <div class="type-tile" data-type="Other"><span class="icon">✨</span><span class="name">Other</span></div>
+                    </div>
+                    <input type="text" id="businessType" placeholder="Or type your business type here...">
+                    <div class="hint">Tap a tile or type your own — this helps AI create the right content for you</div>
                 </div>
-                
-                <!-- Services -->
-                <div class="section-title">🛠️ Services</div>
-                <div class="services-grid-input" id="servicesContainer">
-                    <div class="service-input"><input type="text" class="service-input-field" placeholder="Service 1" value="Fresh Coffee"></div>
-                    <div class="service-input"><input type="text" class="service-input-field" placeholder="Service 2" value="Pastries"></div>
-                    <div class="service-input"><input type="text" class="service-input-field" placeholder="Service 3" value="Free WiFi"></div>
-                    <div class="service-input"><input type="text" class="service-input-field" placeholder="Service 4" value="Catering"></div>
+                <div class="field">
+                    <label>Tagline / Slogan <span class="opt">(optional — AI will create one if left blank)</span></label>
+                    <input type="text" id="tagline" placeholder="e.g., Where style meets excellence">
                 </div>
-                <button type="button" class="add-service-btn" onclick="addService()">+ Add Another Service</button>
-                <div class="helper-text">Edit service names or leave as is - AI will generate descriptions</div>
-                
-                <!-- About Section (Optional) -->
-                <div class="section-title">📖 About Section</div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="customAboutToggle">
-                    <label for="customAboutToggle">Write my own About content (leave unchecked for AI to generate)</label>
-                </div>
-                <div id="customAboutSection" style="display: none; margin-top: 0.5rem;">
-                    <textarea id="customAbout" rows="4" placeholder="Tell your story... What makes your business special? Why should customers choose you?" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px;"></textarea>
-                </div>
-                
-                <!-- Service Descriptions (Optional) -->
-                <div class="section-title">📝 Service Descriptions</div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="customServiceDescToggle">
-                    <label for="customServiceDescToggle">Customize service descriptions (leave unchecked for AI to generate)</label>
-                </div>
-                <div id="customServiceDescSection" style="display: none; margin-top: 0.5rem;">
-                    <div id="serviceDescContainer"></div>
-                    <div class="helper-text">Each service will have a brief description - write your own or let AI handle it</div>
-                </div>
-                
-                <!-- Colors -->
-                <div class="section-title">🎨 Brand Colors</div>
-                <div class="form-group">
-                    <label>Primary Color</label>
-                    <div class="color-row">
-                        <input type="color" id="primaryColor" value="#8B4513">
-                        <input type="text" id="primaryColorText" placeholder="#8B4513" value="#8B4513">
+            </div>
+            <div class="card-footer">
+                <div></div>
+                <button class="btn-next" onclick="goTo(2)">Next: Your Services →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ STEP 2: Services ══ -->
+    <div class="step-panel" id="step-2">
+        <div class="card">
+            <div class="card-header">
+                <div class="step-label">Step 2 of 5</div>
+                <h2>What do you offer? 🛠️</h2>
+                <p>List the main things your business does. Don't worry about descriptions — AI writes those for you.</p>
+            </div>
+            <div class="card-body">
+                <div class="services-list" id="servicesContainer">
+                    <div class="service-row">
+                        <input type="text" class="service-input-field" placeholder="e.g., Haircuts" value="">
+                    </div>
+                    <div class="service-row">
+                        <input type="text" class="service-input-field" placeholder="e.g., Braiding" value="">
+                    </div>
+                    <div class="service-row">
+                        <input type="text" class="service-input-field" placeholder="e.g., Colour & Treatment" value="">
+                        <button class="remove-service" onclick="removeService(this)">×</button>
+                    </div>
+                    <div class="service-row">
+                        <input type="text" class="service-input-field" placeholder="e.g., Kids' Cuts" value="">
+                        <button class="remove-service" onclick="removeService(this)">×</button>
                     </div>
                 </div>
-                
-                <div class="form-group">
-                    <label>Secondary Color</label>
-                    <div class="color-row">
-                        <input type="color" id="secondaryColor" value="#D2691E">
-                        <input type="text" id="secondaryColorText" placeholder="#D2691E" value="#D2691E">
+                <button class="add-service-btn" onclick="addService()">+ Add another service</button>
+                <div class="hint" style="margin-top:0.75rem;">✏️ Edit or clear any service. AI will write descriptions for whatever you list.</div>
+
+                <!-- Optional: Custom about -->
+                <div style="margin-top: 1.5rem;">
+                    <label class="optional-toggle" onclick="toggleSection('customAboutSection', this)">
+                        <input type="checkbox" id="customAboutToggle" onclick="event.stopPropagation(); toggleSection('customAboutSection', this.closest('label'))">
+                        <span>📖 Write your own "About Us" story <span style="color:var(--text-muted); font-weight:400;">(optional — AI writes one if unchecked)</span></span>
+                    </label>
+                    <div class="collapsible" id="customAboutSection">
+                        <textarea id="customAbout" rows="4" placeholder="Tell your story... What makes your business special? Why should customers choose you?"></textarea>
                     </div>
                 </div>
-                
-                <!-- Contact Details -->
-                <div class="section-title">📞 Contact Details</div>
-                <div class="contact-row">
-                    <div class="form-group">
+            </div>
+            <div class="card-footer">
+                <button class="btn-back" onclick="goTo(1)">← Back</button>
+                <button class="btn-next" onclick="goTo(3)">Next: Contact Details →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ STEP 3: Contact ══ -->
+    <div class="step-panel" id="step-3">
+        <div class="card">
+            <div class="card-header">
+                <div class="step-label">Step 3 of 5</div>
+                <h2>How can customers reach you? 📞</h2>
+                <p>This goes on your website so customers can contact you easily.</p>
+            </div>
+            <div class="card-body">
+                <div class="two-col">
+                    <div class="field">
                         <label>Phone Number</label>
                         <input type="tel" id="phone" placeholder="+27 79 123 4567">
                     </div>
-                    <div class="form-group">
+                    <div class="field">
+                        <label>WhatsApp Number</label>
+                        <input type="tel" id="whatsapp" placeholder="+27 79 123 4567">
+                        <div class="hint">WhatsApp is huge in SA — don't skip this one!</div>
+                    </div>
+                </div>
+                <div class="two-col">
+                    <div class="field">
                         <label>Email Address</label>
                         <input type="email" id="email" placeholder="info@yourbusiness.com">
                     </div>
-                </div>
-                <div class="contact-row">
-                    <div class="form-group">
-                        <label>WhatsApp Number</label>
-                        <input type="tel" id="whatsapp" placeholder="+27 79 123 4567">
-                    </div>
-                    <div class="form-group">
-                        <label>Website / Social (optional)</label>
+                    <div class="field">
+                        <label>Instagram / Facebook <span class="opt">(optional)</span></label>
                         <input type="text" id="website" placeholder="https://www.instagram.com/yourbusiness">
                     </div>
                 </div>
-                
-                <!-- Business Type (for AI suggestions) -->
-                <div class="section-title">🤖 AI Assistant</div>
-                <div class="form-group">
-                    <label>Business Type <span class="optional">(helps AI generate relevant content)</span></label>
-                    <input type="text" id="businessType" placeholder="e.g., Coffee Shop, Donut Shop, Gym, Restaurant">
-                </div>
-                
-                <button class="generate-btn" onclick="generateWebsite()">✨ Generate Website</button>
-                <div class="helper-text" style="text-align: center;">💡 Fill in what you know - AI will handle the rest!</div>
             </div>
-            
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>🎨 Generating your beautiful website...</p>
-            </div>
-            
-            <div class="preview-container" id="preview" style="display: none;">
-                <div class="preview-header">
-                    <span>📱 Website Preview</span>
-                    <button class="download-btn" onclick="downloadWebsite()">📥 Download ZIP</button>
-                </div>
-                <iframe class="preview-frame" id="previewFrame"></iframe>
-                <div class="helper-text" style="padding: 1rem; text-align: center; background: #f9fafb;">
-                    ⬇️ Click download to get HTML/CSS/JS files
-                </div>
+            <div class="card-footer">
+                <button class="btn-back" onclick="goTo(2)">← Back</button>
+                <button class="btn-next" onclick="goTo(4)">Next: Look & Feel →</button>
             </div>
         </div>
-    </main>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    
-    <script>
+    </div>
+
+    <!-- ══ STEP 4: Style ══ -->
+    <div class="step-panel" id="step-4">
+        <div class="card">
+            <div class="card-header">
+                <div class="step-label">Step 4 of 5</div>
+                <h2>Make it yours 🎨</h2>
+                <p>Pick your brand colours and upload photos. Everything here is optional — AI will choose great defaults.</p>
+            </div>
+            <div class="card-body">
+
+                <!-- Colors -->
+                <div class="field">
+                    <label>Primary Colour <span class="opt">(your main brand colour)</span></label>
+                    <div class="color-name-row">
+                        <div class="color-live-swatch" id="primarySwatch"></div>
+                        <input type="text" id="primaryColorName" placeholder="e.g., green, hot pink, dark red, navy blue" oninput="resolveColor('primary')">
+                        <input type="hidden" id="primaryColor" value="#1a6b4a">
+                    </div>
+                    <div class="hint">Type any colour name — we'll handle the rest</div>
+                </div>
+                <div class="field">
+                    <label>Secondary Colour <span class="opt">(optional accent colour)</span></label>
+                    <div class="color-name-row">
+                        <div class="color-live-swatch" id="secondarySwatch"></div>
+                        <input type="text" id="secondaryColorName" placeholder="e.g., gold, light pink, white, orange" oninput="resolveColor('secondary')">
+                        <input type="hidden" id="secondaryColor" value="#2d9467">
+                    </div>
+                    <div class="hint">Leave blank and AI will pick a matching colour for you</div>
+                </div>
+
+                <!-- Quick color tiles -->
+                <div class="field">
+                    <label>Or pick a colour quickly 👇</label>
+                    <div class="quick-colors" id="quickColors">
+                        <div class="qc-tile" data-name="Red" data-hex="#e53e3e" style="background:#e53e3e;" onclick="pickQuickColor(this, 'primary')"></div>
+                        <div class="qc-tile" data-name="Pink" data-hex="#d53f8c" style="background:#d53f8c;" onclick="pickQuickColor(this, 'primary')"></div>
+                        <div class="qc-tile" data-name="Purple" data-hex="#6b46c1" style="background:#6b46c1;" onclick="pickQuickColor(this, 'primary')"></div>
+                        <div class="qc-tile" data-name="Blue" data-hex="#2b6cb0" style="background:#2b6cb0;" onclick="pickQuickColor(this, 'primary')"></div>
+                        <div class="qc-tile" data-name="Teal" data-hex="#2c7a7b" style="background:#2c7a7b;" onclick="pickQuickColor(this, 'primary')"></div>
+                        <div class="qc-tile" data-name="Green" data-hex="#276749" style="background:#276749;" onclick="pickQuickColor(this, 'primary')"></div>
+                        <div class="qc-tile" data-name="Orange" data-hex="#c05621" style="background:#c05621;" onclick="pickQuickColor(this, 'primary')"></div>
+                        <div class="qc-tile" data-name="Gold" data-hex="#b7791f" style="background:#b7791f;" onclick="pickQuickColor(this, 'primary')"></div>
+                        <div class="qc-tile" data-name="Black" data-hex="#1a202c" style="background:#1a202c;" onclick="pickQuickColor(this, 'primary')"></div>
+                        <div class="qc-tile" data-name="Brown" data-hex="#7b341e" style="background:#7b341e;" onclick="pickQuickColor(this, 'primary')"></div>
+                    </div>
+                    <div class="hint">Tap a colour to set it as your Primary — then type a second colour for Secondary if you want</div>
+                </div>
+
+                <!-- Logo -->
+                <div class="field" style="margin-top:1.5rem;">
+                    <label>Business Logo <span class="opt">(optional — text logo used if blank)</span></label>
+                    <div class="upload-area" id="logoUploadArea">
+                        <input type="file" id="logoUpload" accept="image/png,image/jpeg,image/jpg">
+                        <span class="icon">🏢</span>
+                        <p><strong>Click to upload</strong> your logo (PNG or JPG)</p>
+                    </div>
+                    <div class="image-preview-row" id="logoPreview" style="display:none;">
+                        <img id="previewImage" alt="Logo">
+                        <button class="clear-btn" onclick="clearLogo()">Remove</button>
+                    </div>
+                </div>
+
+                <!-- Hero Image -->
+                <div class="field">
+                    <label>Main Banner Photo <span class="opt">(optional — AI finds one if blank)</span></label>
+                    <div class="upload-area">
+                        <input type="file" id="heroImageUpload" accept="image/*">
+                        <span class="icon">🖼️</span>
+                        <p><strong>Click to upload</strong> a photo for your homepage banner</p>
+                    </div>
+                    <div class="image-preview-row" id="heroImagePreview" style="display:none;">
+                        <img id="heroPreviewImg" alt="Hero">
+                        <button class="clear-btn" onclick="clearHeroImage()">Remove</button>
+                    </div>
+                </div>
+
+                <!-- About Image -->
+                <div class="field">
+                    <label>About Section Photo <span class="opt">(optional)</span></label>
+                    <div class="upload-area">
+                        <input type="file" id="aboutImageUpload" accept="image/*">
+                        <span class="icon">📷</span>
+                        <p><strong>Click to upload</strong> a photo for your About section</p>
+                    </div>
+                    <div class="image-preview-row" id="aboutImagePreview" style="display:none;">
+                        <img id="aboutPreviewImg" alt="About">
+                        <button class="clear-btn" onclick="clearAboutImage()">Remove</button>
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-footer">
+                <button class="btn-back" onclick="goTo(3)">← Back</button>
+                <button class="btn-next" onclick="goTo(5)">Next: Review →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ STEP 5: Review & Generate ══ -->
+    <div class="step-panel" id="step-5">
+        <div class="card">
+            <div class="card-header">
+                <div class="step-label">Step 5 of 5</div>
+                <h2>You're ready to go! 🚀</h2>
+                <p>Here's a summary of your website. Hit generate when you're happy.</p>
+            </div>
+            <div class="card-body">
+                <div id="reviewSummary" style="background:var(--bg); border-radius:12px; padding:1.25rem; line-height:1.9; font-size:0.9rem;">
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn-back" onclick="goTo(4)">← Back</button>
+                <button class="btn-generate" onclick="generateWebsite()">✨ Generate My Website</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-wrap" id="loading">
+        <div class="spinner"></div>
+        <h3>Building your website...</h3>
+        <p>Our AI is crafting your pages. This takes about 30–60 seconds.</p>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-wrap" id="preview">
+        <div class="preview-bar">
+            <span>📱 Your Website Preview</span>
+            <button class="btn-download" onclick="downloadWebsite()">📥 Download ZIP</button>
+        </div>
+        <iframe class="preview-frame" id="previewFrame"></iframe>
+        <div class="preview-hint">
+            ⬇️ Download to get your HTML/CSS/JS files &nbsp;•&nbsp;
+            <button class="btn-restart" onclick="restart()">Build another website</button>
+        </div>
+    </div>
+
+</div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+<script>
+    let currentStep = 1;
     let currentFiles = null;
     let logoDataUrl = null;
     let customHeroImage = null;
     let customAboutImage = null;
-        
-        // Logo upload handler
-        const logoUpload = document.getElementById('logoUpload');
-        if (logoUpload) {
-            logoUpload.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        logoDataUrl = event.target.result;
-                        const preview = document.getElementById('logoPreview');
-                        const previewImg = document.getElementById('previewImage');
-                        if (previewImg) previewImg.src = logoDataUrl;
-                        if (preview) preview.style.display = 'flex';
-                    };
-                    reader.readAsDataURL(file);
-                } else if (file) {
-                    alert('Please upload a PNG or JPG image');
-                    logoUpload.value = '';
-                }
-            });
+
+    // ── NAVIGATION ──
+    function goTo(step) {
+        if (step > currentStep && !validateStep(currentStep)) return;
+
+        document.getElementById(`step-${currentStep}`).classList.remove('active');
+        document.getElementById(`step-${step}`).classList.add('active');
+
+        // Update dots
+        for (let i = 1; i <= 5; i++) {
+            const dot = document.getElementById(`dot-${i}`);
+            dot.classList.remove('active', 'done');
+            if (i < step) dot.classList.add('done');
+            else if (i === step) dot.classList.add('active');
         }
-        
-        function clearLogo() {
-            logoDataUrl = null;
-            const logoUpload = document.getElementById('logoUpload');
-            const preview = document.getElementById('logoPreview');
-            if (logoUpload) logoUpload.value = '';
-            if (preview) preview.style.display = 'none';
+        // Update lines
+        for (let i = 1; i <= 4; i++) {
+            const line = document.getElementById(`line-${i}`);
+            line.classList.toggle('done', i < step);
         }
-        // Hero image upload handler
-const heroUpload = document.getElementById('heroImageUpload');
-if (heroUpload) {
-    heroUpload.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                customHeroImage = event.target.result;
-                document.getElementById('heroPreviewImg').src = customHeroImage;
-                document.getElementById('heroImagePreview').style.display = 'flex';
-            };
-            reader.readAsDataURL(file);
-        } else if (file) {
-            alert('Please upload a PNG or JPG image');
-            this.value = '';
+
+        if (step === 5) buildReview();
+        currentStep = step;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function validateStep(step) {
+        if (step === 1) {
+            const name = document.getElementById('businessName').value.trim();
+            const loc = document.getElementById('location').value.trim();
+            if (!name) { alert('Please enter your business name.'); return false; }
+            if (!loc) { alert('Please enter your location.'); return false; }
         }
+        return true;
+    }
+
+    // ── BUSINESS TYPE TILES ──
+    document.querySelectorAll('.type-tile').forEach(tile => {
+        tile.addEventListener('click', () => {
+            document.querySelectorAll('.type-tile').forEach(t => t.classList.remove('selected'));
+            tile.classList.add('selected');
+            document.getElementById('businessType').value = tile.dataset.type;
+        });
     });
-}
 
-function clearHeroImage() {
-    customHeroImage = null;
-    document.getElementById('heroImageUpload').value = '';
-    document.getElementById('heroImagePreview').style.display = 'none';
-}
+    // ── SERVICES ──
+    function addService() {
+        const container = document.getElementById('servicesContainer');
+        const row = document.createElement('div');
+        row.className = 'service-row';
+        row.innerHTML = `<input type="text" class="service-input-field" placeholder="New service"><button class="remove-service" onclick="removeService(this)">×</button>`;
+        container.appendChild(row);
+    }
 
-// About image upload handler
-const aboutUpload = document.getElementById('aboutImageUpload');
-if (aboutUpload) {
-    aboutUpload.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                customAboutImage = event.target.result;
-                document.getElementById('aboutPreviewImg').src = customAboutImage;
-                document.getElementById('aboutImagePreview').style.display = 'flex';
-            };
-            reader.readAsDataURL(file);
-        } else if (file) {
-            alert('Please upload a PNG or JPG image');
-            this.value = '';
+    function removeService(btn) {
+        const container = document.getElementById('servicesContainer');
+        if (container.children.length > 1) {
+            btn.parentElement.remove();
+        } else {
+            alert('You need at least one service.');
         }
-    });
-}
+    }
 
-function clearAboutImage() {
-    customAboutImage = null;
-    document.getElementById('aboutImageUpload').value = '';
-    document.getElementById('aboutImagePreview').style.display = 'none';
-}
-        
-        // Toggle for custom about section
-        const aboutToggle = document.getElementById('customAboutToggle');
-        if (aboutToggle) {
-            aboutToggle.addEventListener('change', function() {
-                const section = document.getElementById('customAboutSection');
-                if (section) section.style.display = this.checked ? 'block' : 'none';
-            });
+    function getServices() {
+        return Array.from(document.querySelectorAll('.service-input-field'))
+            .map(i => i.value.trim()).filter(Boolean);
+    }
+
+    // ── TOGGLE COLLAPSIBLE ──
+    function toggleSection(id, labelEl) {
+        const section = document.getElementById(id);
+        const cb = labelEl.querySelector('input[type="checkbox"]');
+        if (cb && cb.checked) {
+            section.classList.add('open');
+        } else {
+            section.classList.remove('open');
         }
-        
-        // Toggle for custom service descriptions
-        const serviceDescToggle = document.getElementById('customServiceDescToggle');
-        if (serviceDescToggle) {
-            serviceDescToggle.addEventListener('change', function() {
-                const section = document.getElementById('customServiceDescSection');
-                if (section) section.style.display = this.checked ? 'block' : 'none';
-                if (this.checked) updateServiceDescInputs();
-            });
+    }
+
+    // ── COLOUR NAME → HEX ──
+    const colorMap = {
+        // Reds
+        'red': '#e53e3e', 'dark red': '#9b2335', 'light red': '#fc8181', 'crimson': '#dc143c',
+        // Pinks
+        'pink': '#ed64a6', 'hot pink': '#d53f8c', 'light pink': '#fbb6ce', 'baby pink': '#fce4ec',
+        'rose': '#f43f5e', 'magenta': '#c026d3',
+        // Purples
+        'purple': '#6b46c1', 'light purple': '#9f7aea', 'dark purple': '#44337a', 'violet': '#7c3aed', 'lavender': '#a78bfa',
+        // Blues
+        'blue': '#2b6cb0', 'dark blue': '#1e3a5f', 'light blue': '#63b3ed', 'navy': '#1a365d', 'navy blue': '#1a365d',
+        'sky blue': '#0ea5e9', 'royal blue': '#3182ce', 'baby blue': '#bfdbfe',
+        // Greens
+        'green': '#276749', 'dark green': '#1a4731', 'light green': '#68d391', 'lime': '#84cc16',
+        'teal': '#2c7a7b', 'mint': '#a7f3d0', 'forest green': '#166534', 'olive': '#713f12',
+        // Oranges & Yellows
+        'orange': '#c05621', 'light orange': '#f6ad55', 'yellow': '#d69e2e', 'gold': '#b7791f',
+        'amber': '#d97706', 'lemon': '#fef08a',
+        // Browns
+        'brown': '#7b341e', 'dark brown': '#5c2d1e', 'light brown': '#c6956a', 'tan': '#c4a882', 'beige': '#f5f0e8',
+        // Neutrals
+        'black': '#1a202c', 'dark grey': '#4a5568', 'dark gray': '#4a5568', 'grey': '#718096', 'gray': '#718096',
+        'light grey': '#e2e8f0', 'light gray': '#e2e8f0', 'white': '#f9fafb', 'off white': '#f7f7f7',
+        // SA-specific common asks
+        'maroon': '#800000', 'burgundy': '#800020', 'copper': '#b87333', 'turquoise': '#40e0d0',
+        'indigo': '#4338ca', 'coral': '#ff6b6b', 'peach': '#fead79', 'cream': '#fffdd0',
+        'charcoal': '#36454f', 'silver': '#c0c0c0'
+    };
+
+    function resolveColor(which) {
+        const nameInput = document.getElementById(`${which}ColorName`);
+        const hiddenInput = document.getElementById(`${which}Color`);
+        const swatch = document.getElementById(`${which}Swatch`);
+
+        const raw = nameInput.value.trim().toLowerCase();
+        if (!raw) {
+            swatch.style.background = '#e5e7eb';
+            hiddenInput.value = which === 'primary' ? '#1a6b4a' : '#2d9467';
+            return;
         }
-        
-        function updateServiceDescInputs() {
-            const services = getServices();
-            const container = document.getElementById('serviceDescContainer');
-            if (container) {
-                container.innerHTML = services.map((service, index) => `
-                    <div class="form-group" style="margin-bottom: 0.75rem;">
-                        <label>${service}:</label>
-                        <textarea class="service-desc-input" data-index="${index}" rows="2" placeholder="Describe ${service.toLowerCase()}..."></textarea>
-                    </div>
-                `).join('');
+
+        // Direct match
+        let hex = colorMap[raw];
+
+        // Partial match fallback
+        if (!hex) {
+            const match = Object.keys(colorMap).find(k => k.includes(raw) || raw.includes(k));
+            if (match) hex = colorMap[match];
+        }
+
+        // Use canvas trick as last resort (handles browser-known colour names)
+        if (!hex) {
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = 1;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = raw;
+            ctx.fillRect(0, 0, 1, 1);
+            const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+            if (!(r === 0 && g === 0 && b === 0 && raw !== 'black')) {
+                hex = `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
             }
         }
-        
-        function addService() {
-            const container = document.getElementById('servicesContainer');
-            if (container) {
-                const newDiv = document.createElement('div');
-                newDiv.className = 'service-input';
-                newDiv.innerHTML = `
-                    <input type="text" class="service-input-field" placeholder="New Service" value="New Service">
-                    <button onclick="removeService(this)">×</button>
-                `;
-                container.appendChild(newDiv);
-                if (document.getElementById('customServiceDescToggle')?.checked) {
-                    updateServiceDescInputs();
-                }
-            }
+
+        if (hex) {
+            hiddenInput.value = hex;
+            swatch.style.background = hex;
+            nameInput.style.borderColor = 'var(--brand)';
+        } else {
+            swatch.style.background = '#e5e7eb';
+            nameInput.style.borderColor = '#ef4444';
         }
-        
-        function removeService(btn) {
-            const serviceDiv = btn.parentElement;
-            const container = document.getElementById('servicesContainer');
-            if (container && container.children.length > 1) {
-                serviceDiv.remove();
-                if (document.getElementById('customServiceDescToggle')?.checked) {
-                    updateServiceDescInputs();
-                }
+    }
+
+    function pickQuickColor(tile, which) {
+        const hex = tile.dataset.hex;
+        const name = tile.dataset.name;
+        document.querySelectorAll('.qc-tile').forEach(t => t.classList.remove('active-primary'));
+        tile.classList.add('active-primary');
+        document.getElementById(`${which}Color`).value = hex;
+        document.getElementById(`${which}ColorName`).value = name;
+        document.getElementById(`${which}Swatch`).style.background = hex;
+        document.getElementById(`${which}ColorName`).style.borderColor = 'var(--brand)';
+    }
+
+    // Init swatches on load
+    document.getElementById('primarySwatch').style.background = '#1a6b4a';
+    document.getElementById('secondarySwatch').style.background = '#2d9467';
+
+
+
+    // ── IMAGE UPLOADS ──
+    function handleUpload(inputId, previewId, imgId, storeFn) {
+        document.getElementById(inputId).addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) { alert('Please upload an image file.'); this.value = ''; return; }
+            const reader = new FileReader();
+            reader.onload = ev => {
+                storeFn(ev.target.result);
+                document.getElementById(imgId).src = ev.target.result;
+                document.getElementById(previewId).style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+    handleUpload('logoUpload', 'logoPreview', 'previewImage', v => logoDataUrl = v);
+    handleUpload('heroImageUpload', 'heroImagePreview', 'heroPreviewImg', v => customHeroImage = v);
+    handleUpload('aboutImageUpload', 'aboutImagePreview', 'aboutPreviewImg', v => customAboutImage = v);
+
+    function clearLogo() { logoDataUrl = null; document.getElementById('logoUpload').value = ''; document.getElementById('logoPreview').style.display = 'none'; }
+    function clearHeroImage() { customHeroImage = null; document.getElementById('heroImageUpload').value = ''; document.getElementById('heroImagePreview').style.display = 'none'; }
+    function clearAboutImage() { customAboutImage = null; document.getElementById('aboutImageUpload').value = ''; document.getElementById('aboutImagePreview').style.display = 'none'; }
+
+    // ── REVIEW SUMMARY ──
+    function buildReview() {
+        const name = document.getElementById('businessName').value || '—';
+        const loc = document.getElementById('location').value || '—';
+        const type = document.getElementById('businessType').value || 'Not specified';
+        const services = getServices();
+        const phone = document.getElementById('phone').value || '—';
+        const wa = document.getElementById('whatsapp').value || '—';
+        const email = document.getElementById('email').value || '—';
+
+        document.getElementById('reviewSummary').innerHTML = `
+            <div><strong>🏢 Business:</strong> ${name}</div>
+            <div><strong>📍 Location:</strong> ${loc}</div>
+            <div><strong>🏷️ Type:</strong> ${type}</div>
+            <div><strong>🛠️ Services:</strong> ${services.join(', ') || '—'}</div>
+            <div><strong>📞 Phone:</strong> ${phone}</div>
+            <div><strong>💬 WhatsApp:</strong> ${wa}</div>
+            <div><strong>📧 Email:</strong> ${email}</div>
+            <div style="margin-top:0.5rem; padding-top:0.75rem; border-top:1px solid var(--border); color:var(--text-muted); font-size:0.82rem;">
+                Need to change something? Use the Back button.
+            </div>
+        `;
+    }
+
+    // ── GENERATE ──
+    async function generateWebsite() {
+        const userInputs = {
+            name: document.getElementById('businessName').value.trim(),
+            location: document.getElementById('location').value.trim(),
+            tagline: document.getElementById('tagline').value.trim(),
+            services: getServices(),
+            serviceDescriptions: null,
+            primaryColor: document.getElementById('primaryColor').value,
+            secondaryColor: document.getElementById('secondaryColor').value,
+            businessType: document.getElementById('businessType').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            whatsapp: document.getElementById('whatsapp').value.trim(),
+            website: document.getElementById('website').value.trim(),
+            customAbout: document.getElementById('customAboutToggle').checked ? document.getElementById('customAbout').value.trim() : null,
+            logoDataUrl,
+            customHeroImage,
+            customAboutImage
+        };
+
+        if (!userInputs.name) { alert('Please enter a business name.'); goTo(1); return; }
+
+        // Hide wizard, show loading
+        document.getElementById(`step-${currentStep}`).classList.remove('active');
+        document.getElementById('progressBar').style.display = 'none';
+        document.getElementById('loading').classList.add('show');
+
+        let description = `BUSINESS NAME: "${userInputs.name}". `;
+        if (userInputs.businessType) description += `Business type: ${userInputs.businessType}. `;
+        if (userInputs.location) description += `Located in ${userInputs.location}. `;
+        if (userInputs.tagline) description += `Tagline: ${userInputs.tagline}. `;
+        description += `Services: ${userInputs.services.join(', ')}. `;
+
+        try {
+            const response = await fetch('/api/website/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ description, userInputs })
+            });
+            const result = await response.json();
+
+            document.getElementById('loading').classList.remove('show');
+
+            if (result.html) {
+                currentFiles = result;
+                document.getElementById('previewFrame').src = result.html;
+                document.getElementById('preview').classList.add('show');
             } else {
-                alert('At least one service is required');
+                alert('Error: ' + (result.error || 'Unknown error'));
+                restart();
             }
+        } catch (err) {
+            document.getElementById('loading').classList.remove('show');
+            alert('Could not connect to server. Please try again.');
+            restart();
         }
-        
-        function getServices() {
-            const inputs = document.querySelectorAll('.service-input-field');
-            return Array.from(inputs).map(input => input.value.trim()).filter(s => s);
+    }
+
+    // ── DOWNLOAD ──
+    async function downloadWebsite() {
+        if (!currentFiles) return;
+        try {
+            const [html, css, js] = await Promise.all([
+                fetch(currentFiles.html).then(r => r.text()),
+                fetch(currentFiles.css).then(r => r.text()),
+                fetch(currentFiles.js).then(r => r.text())
+            ]);
+            const zip = new JSZip();
+            zip.file(currentFiles.html.split('/').pop(), html);
+            zip.file(currentFiles.css.split('/').pop(), css);
+            zip.file(currentFiles.js.split('/').pop(), js);
+            const blob = await zip.generateAsync({ type: 'blob' });
+            saveAs(blob, 'my-website.zip');
+        } catch (e) {
+            alert('Download failed. Please try again.');
         }
-        
-        function getServiceDescriptions() {
-            if (!document.getElementById('customServiceDescToggle')?.checked) return null;
-            const descs = document.querySelectorAll('.service-desc-input');
-            const services = getServices();
-            const result = {};
-            descs.forEach((desc, i) => {
-                if (services[i] && desc.value.trim()) {
-                    result[services[i]] = desc.value.trim();
-                }
-            });
-            return Object.keys(result).length > 0 ? result : null;
-        }
-        
-        // Sync color picker with text input
-        const primaryColor = document.getElementById('primaryColor');
-        const primaryColorText = document.getElementById('primaryColorText');
-        const secondaryColor = document.getElementById('secondaryColor');
-        const secondaryColorText = document.getElementById('secondaryColorText');
-        
-        if (primaryColor && primaryColorText) {
-            primaryColor.addEventListener('input', () => primaryColorText.value = primaryColor.value);
-            primaryColorText.addEventListener('input', () => primaryColor.value = primaryColorText.value);
-        }
-        if (secondaryColor && secondaryColorText) {
-            secondaryColor.addEventListener('input', () => secondaryColorText.value = secondaryColor.value);
-            secondaryColorText.addEventListener('input', () => secondaryColor.value = secondaryColorText.value);
-        }
-        
-        async function generateWebsite() {
-            // Collect all user inputs
-            const userInputs = {
-                name: document.getElementById('businessName')?.value.trim() || '',
-                location: document.getElementById('location')?.value.trim() || '',
-                tagline: document.getElementById('tagline')?.value.trim() || '',
-                services: getServices(),
-                serviceDescriptions: getServiceDescriptions(),
-                primaryColor: document.getElementById('primaryColor')?.value || '#8B4513',
-                secondaryColor: document.getElementById('secondaryColor')?.value || '#D2691E',
-                businessType: document.getElementById('businessType')?.value.trim() || '',
-                phone: document.getElementById('phone')?.value.trim() || '',
-                email: document.getElementById('email')?.value.trim() || '',
-                whatsapp: document.getElementById('whatsapp')?.value.trim() || '',
-                website: document.getElementById('website')?.value.trim() || '',
-                customAbout: document.getElementById('customAboutToggle')?.checked ? document.getElementById('customAbout')?.value.trim() : null,
-                logoDataUrl: logoDataUrl,
-                customHeroImage: customHeroImage,
-                customAboutImage: customAboutImage
-            };
-            
-            if (!userInputs.name) {
-                alert('Please enter a Business Name');
-                return;
+    }
+
+    // ── RESTART ──
+    function restart() {
+        document.getElementById('preview').classList.remove('show');
+        document.getElementById('progressBar').style.display = 'flex';
+        currentStep = 1;
+        document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('step-1').classList.add('active');
+        document.querySelectorAll('.step-dot').forEach((d, i) => {
+            d.classList.remove('active', 'done');
+            if (i === 0) d.classList.add('active');
+        });
+        document.querySelectorAll('.step-line').forEach(l => l.classList.remove('done'));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── MOBILE MENU ──
+    document.getElementById('mobileMenu').addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('active');
+    });
+</script>
+<script>
+    document.getElementById('mobileMenu').addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('active');
+    });
+</script>
+
+<!-- Auth logout script (add this) -->
+<script>
+    fetch('/api/auth/me')
+        .then(r => r.json())
+        .then(data => {
+            const authLink = document.getElementById('authLink');
+            if (data.loggedIn) {
+                authLink.innerHTML = '<a href="#" onclick="logout()">Logout</a>';
+            } else {
+                authLink.innerHTML = '<a href="/login">Login</a>';
             }
-            
-            // Build description for backend
-            let description = `BUSINESS NAME: "${userInputs.name}". `;
-            if (userInputs.businessType) description += `Business type: ${userInputs.businessType}. `;
-            if (userInputs.location) description += `Located in ${userInputs.location}. `;
-            if (userInputs.tagline) description += `Tagline: ${userInputs.tagline}. `;
-            description += `Services: ${userInputs.services.join(', ')}. `;
-            
-            const loading = document.getElementById('loading');
-            const preview = document.getElementById('preview');
-            if (loading) loading.style.display = 'block';
-            if (preview) preview.style.display = 'none';
-            
-            try {
-                const response = await fetch('/api/website/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ description, userInputs })
-                });
-                
-                const result = await response.json();
-                
-                if (result.html) {
-                    currentFiles = result;
-                    const previewFrame = document.getElementById('previewFrame');
-                    if (previewFrame) previewFrame.src = result.html;
-                    if (loading) loading.style.display = 'none';
-                    if (preview) preview.style.display = 'block';
-                } else {
-                    alert('Error generating website: ' + (result.error || 'Unknown error'));
-                    if (loading) loading.style.display = 'none';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error connecting to server');
-                if (loading) loading.style.display = 'none';
-            }
-        }
-        
-        async function downloadWebsite() {
-            if (!currentFiles) {
-                alert('No website to download. Generate a website first.');
-                return;
-            }
-            
-            try {
-                const htmlResponse = await fetch(currentFiles.html);
-                const cssResponse = await fetch(currentFiles.css);
-                const jsResponse = await fetch(currentFiles.js);
-                
-                const htmlContent = await htmlResponse.text();
-                const cssContent = await cssResponse.text();
-                const jsContent = await jsResponse.text();
-                
-                const zip = new JSZip();
-                const htmlFilename = currentFiles.html.split('/').pop();
-                const cssFilename = currentFiles.css.split('/').pop();
-                const jsFilename = currentFiles.js.split('/').pop();
-                
-                zip.file(htmlFilename, htmlContent);
-                zip.file(cssFilename, cssContent);
-                zip.file(jsFilename, jsContent);
-                
-                const content = await zip.generateAsync({ type: "blob" });
-                saveAs(content, "website.zip");
-                
-                alert('Website downloaded! Unzip to get your files.');
-            } catch (error) {
-                console.error('Download error:', error);
-                alert('Error downloading website.');
-            }
-        }
-    </script>
+        });
     
-    <!-- Mobile Menu Script -->
-    <script>
-        const mobileMenu = document.getElementById('mobileMenu');
-        const navLinks = document.getElementById('navLinks');
-        const navOverlay = document.getElementById('navOverlay');
-        
-        function closeMenu() {
-            if (navLinks) navLinks.classList.remove('active');
-            if (navOverlay) navOverlay.classList.remove('active');
-        }
-        
-        function toggleMenu(e) {
-            if (e) e.stopPropagation();
-            if (navLinks) navLinks.classList.toggle('active');
-            if (navOverlay) navOverlay.classList.toggle('active');
-        }
-        
-        if (mobileMenu) mobileMenu.addEventListener('click', toggleMenu);
-        if (navOverlay) navOverlay.addEventListener('click', closeMenu);
-        if (navLinks) {
-            navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
-        }
-    </script>
+    function logout() {
+        fetch('/api/auth/logout', { method: 'POST' })
+            .then(() => window.location.href = '/');
+    }
+</script>
 </body>
 </html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - May AI Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #1a6b4a;
+            --brand-light: #e8f5ee;
+            --brand-mid: #2d9467;
+            --accent: #f59e0b;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --bg: #f7f9f7;
+            --white: #ffffff;
+            --radius: 14px;
+            --shadow: 0 4px 24px rgba(26,107,74,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .auth-wrap {
+            width: 100%; max-width: 420px;
+        }
+
+        /* ── LOGO ── */
+        .auth-logo {
+            text-align: center; margin-bottom: 2rem;
+        }
+        .auth-logo a {
+            font-family: 'Fraunces', serif;
+            font-size: 1.8rem; font-weight: 900;
+            color: var(--brand); text-decoration: none;
+        }
+        .auth-logo p {
+            font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;
+        }
+
+        /* ── CARD ── */
+        .auth-card {
+            background: var(--white); border-radius: var(--radius);
+            box-shadow: var(--shadow); border: 1px solid rgba(26,107,74,0.07);
+            overflow: hidden;
+        }
+        .card-tabs {
+            display: grid; grid-template-columns: 1fr 1fr;
+            border-bottom: 2px solid var(--border);
+        }
+        .card-tab {
+            padding: 1rem; text-align: center;
+            font-size: 0.9rem; font-weight: 700; cursor: pointer;
+            border: none; background: none; font-family: inherit;
+            color: var(--text-muted); transition: all 0.2s;
+        }
+        .card-tab.active { color: var(--brand); border-bottom: 2px solid var(--brand); margin-bottom: -2px; }
+
+        .card-body { padding: 2rem; }
+
+        /* ── PANELS ── */
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* ── FIELDS ── */
+        .field { margin-bottom: 1.1rem; }
+        .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; }
+        .field input {
+            width: 100%; padding: 0.8rem 1rem;
+            border: 2px solid var(--border); border-radius: 10px;
+            font-family: inherit; font-size: 0.95rem; color: var(--text);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .field input:focus {
+            outline: none; border-color: var(--brand);
+            box-shadow: 0 0 0 3px var(--brand-light);
+        }
+        .field input::placeholder { color: #c4cdd5; }
+
+        /* ── FORGOT LINK ── */
+        .forgot-link {
+            display: block; text-align: right;
+            font-size: 0.78rem; color: var(--brand); font-weight: 600;
+            text-decoration: none; margin-top: -0.75rem; margin-bottom: 1rem;
+            cursor: pointer;
+        }
+        .forgot-link:hover { text-decoration: underline; }
+
+        /* ── BUTTON ── */
+        .btn-submit {
+            width: 100%; padding: 0.9rem;
+            background: linear-gradient(135deg, var(--brand), var(--brand-mid));
+            color: white; border: none; border-radius: 10px;
+            font-family: inherit; font-size: 1rem; font-weight: 700;
+            cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 4px 14px rgba(26,107,74,0.25);
+        }
+        .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,107,74,0.35); }
+        .btn-submit:disabled { background: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* ── ERROR / SUCCESS ── */
+        .msg {
+            padding: 0.85rem 1rem; border-radius: 10px;
+            font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem;
+            display: none;
+        }
+        .msg.error { background: #fee2e2; color: #991b1b; display: block; }
+        .msg.success { background: var(--brand-light); color: var(--brand); display: block; }
+
+        /* ── DIVIDER ── */
+        .divider {
+            display: flex; align-items: center; gap: 1rem;
+            margin: 1.5rem 0; color: var(--text-muted); font-size: 0.8rem;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px; background: var(--border);
+        }
+
+        /* ── FORGOT PASSWORD PANEL ── */
+        .back-btn {
+            background: none; border: none; color: var(--brand);
+            font-family: inherit; font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; gap: 0.3rem;
+            margin-bottom: 1.25rem; padding: 0;
+        }
+        .back-btn:hover { text-decoration: underline; }
+
+        .panel-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.35rem; }
+        .panel-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6; }
+
+        /* ── FOOTER ── */
+        .auth-footer {
+            text-align: center; margin-top: 1.5rem;
+            font-size: 0.82rem; color: var(--text-muted);
+        }
+        .auth-footer a { color: var(--brand); font-weight: 600; text-decoration: none; }
+        .auth-footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="auth-wrap">
+
+    <!-- Logo -->
+    <div class="auth-logo">
+        <a href="/">May AI Lab</a>
+        <p>The African business platform</p>
+    </div>
+
+    <!-- Card -->
+    <div class="auth-card">
+
+        <!-- Login / Signup tabs -->
+        <div class="card-tabs" id="authTabs">
+            <button class="card-tab active" onclick="switchPanel('login')">Log In</button>
+            <button class="card-tab" onclick="switchPanel('signup')">Sign Up</button>
+        </div>
+
+        <div class="card-body">
+
+            <!-- ── LOGIN PANEL ── -->
+            <div class="panel active" id="panel-login">
+                <div class="msg" id="loginMsg"></div>
+                <div class="field">
+                    <label>Email Address</label>
+                    <input type="email" id="loginEmail" placeholder="you@example.com">
+                </div>
+                <div class="field">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Your password">
+                </div>
+                <span class="forgot-link" onclick="switchPanel('forgot')">Forgot password?</span>
+                <button class="btn-submit" onclick="handleLogin()">Log In →</button>
+            </div>
+
+            <!-- ── SIGNUP PANEL ── -->
+            <div class="panel" id="panel-signup">
+                <div class="msg" id="signupMsg"></div>
+                <div class="field">
+                    <label>Username</label>
+                    <input type="text" id="signupUsername" placeholder="e.g., thabosalonJHB">
+                </div>
+                <div class="field">
+                    <label>Email Address</label>
+                    <input type="email" id="signupEmail" placeholder="you@example.com">
+                </div>
+                <div class="field">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" placeholder="Choose a strong password">
+                </div>
+                <div class="field">
+                    <label>Confirm Password</label>
+                    <input type="password" id="signupConfirm" placeholder="Repeat your password">
+                </div>
+                <button class="btn-submit" onclick="handleSignup()">Create Account →</button>
+                <div style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-top:0.75rem;">
+                    By signing up you agree to our terms of service
+                </div>
+            </div>
+
+            <!-- ── FORGOT PASSWORD PANEL ── -->
+            <div class="panel" id="panel-forgot">
+                <button class="back-btn" onclick="switchPanel('login')">← Back to login</button>
+                <div class="panel-title">Reset your password</div>
+                <div class="panel-desc">Enter your email address and we'll send you a link to reset your password.</div>
+                <div class="msg" id="forgotMsg"></div>
+                <div class="field">
+                    <label>Email Address</label>
+                    <input type="email" id="forgotEmail" placeholder="you@example.com">
+                </div>
+                <button class="btn-submit" onclick="handleForgot()">Send Reset Link →</button>
+            </div>
+
+            <!-- ── RESET PASSWORD PANEL ── -->
+            <div class="panel" id="panel-reset">
+                <div class="panel-title">Set new password</div>
+                <div class="panel-desc">Enter your new password below.</div>
+                <div class="msg" id="resetMsg"></div>
+                <div class="field">
+                    <label>New Password</label>
+                    <input type="password" id="resetPassword" placeholder="New password">
+                </div>
+                <div class="field">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="resetConfirm" placeholder="Repeat new password">
+                </div>
+                <button class="btn-submit" onclick="handleReset()">Update Password →</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="auth-footer">
+        <a href="/">← Back to home</a>
+    </div>
+
+</div>
+
+<script>
+    // Check if there's a reset token in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const resetToken = urlParams.get('token');
+    if (resetToken) {
+        switchPanel('reset');
+        document.getElementById('authTabs').style.display = 'none';
+    }
+
+    // ── PANEL SWITCHING ──
+    function switchPanel(name) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.card-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(`panel-${name}`).classList.add('active');
+        if (name === 'login') document.querySelector('.card-tab:first-child').classList.add('active');
+        if (name === 'signup') document.querySelector('.card-tab:last-child').classList.add('active');
+        clearMessages();
+    }
+
+    function clearMessages() {
+        document.querySelectorAll('.msg').forEach(m => {
+            m.className = 'msg';
+            m.textContent = '';
+        });
+    }
+
+    function showMsg(id, text, type) {
+        const el = document.getElementById(id);
+        el.textContent = text;
+        el.className = `msg ${type}`;
+    }
+
+    // ── LOGIN ──
+    async function handleLogin() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        if (!email || !password) { showMsg('loginMsg', 'Please fill in all fields.', 'error'); return; }
+
+        const btn = event.target;
+        btn.disabled = true; btn.textContent = 'Logging in...';
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (!res.ok) { showMsg('loginMsg', data.error || 'Invalid credentials.', 'error'); return; }
+            showMsg('loginMsg', `Welcome back, ${data.username}! Redirecting...`, 'success');
+            setTimeout(() => window.location.href = '/business', 1200);
+        } catch(e) {
+            showMsg('loginMsg', 'Connection error. Please try again.', 'error');
+        }
+        btn.disabled = false; btn.textContent = 'Log In →';
+    }
+
+    // ── SIGNUP ──
+    async function handleSignup() {
+        const username = document.getElementById('signupUsername').value.trim();
+        const email = document.getElementById('signupEmail').value.trim();
+        const password = document.getElementById('signupPassword').value;
+        const confirm = document.getElementById('signupConfirm').value;
+
+        if (!username || !email || !password) { showMsg('signupMsg', 'Please fill in all fields.', 'error'); return; }
+        if (password !== confirm) { showMsg('signupMsg', 'Passwords do not match.', 'error'); return; }
+        if (password.length < 6) { showMsg('signupMsg', 'Password must be at least 6 characters.', 'error'); return; }
+        if (username.length < 3) { showMsg('signupMsg', 'Username must be at least 3 characters.', 'error'); return; }
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) { showMsg('signupMsg', 'Username can only contain letters, numbers and underscores.', 'error'); return; }
+
+        const btn = event.target;
+        btn.disabled = true; btn.textContent = 'Creating account...';
+
+        try {
+            const res = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            });
+            const data = await res.json();
+            if (!res.ok) { showMsg('signupMsg', data.error || 'Signup failed.', 'error'); return; }
+            showMsg('signupMsg', `Account created! Welcome, ${data.username}! Redirecting...`, 'success');
+            setTimeout(() => window.location.href = '/business', 1500);
+        } catch(e) {
+            showMsg('signupMsg', 'Connection error. Please try again.', 'error');
+        }
+        btn.disabled = false; btn.textContent = 'Create Account →';
+    }
+
+    // ── FORGOT PASSWORD ──
+    async function handleForgot() {
+        const email = document.getElementById('forgotEmail').value.trim();
+        if (!email) { showMsg('forgotMsg', 'Please enter your email.', 'error'); return; }
+
+        const btn = event.target;
+        btn.disabled = true; btn.textContent = 'Sending...';
+
+        try {
+            const res = await fetch('/api/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            if (!res.ok) { showMsg('forgotMsg', data.error || 'Something went wrong.', 'error'); return; }
+            showMsg('forgotMsg', 'Reset link sent! Check your email inbox.', 'success');
+        } catch(e) {
+            showMsg('forgotMsg', 'Connection error. Please try again.', 'error');
+        }
+        btn.disabled = false; btn.textContent = 'Send Reset Link →';
+    }
+
+    // ── RESET PASSWORD ──
+    async function handleReset() {
+        const password = document.getElementById('resetPassword').value;
+        const confirm = document.getElementById('resetConfirm').value;
+        if (!password) { showMsg('resetMsg', 'Please enter a new password.', 'error'); return; }
+        if (password !== confirm) { showMsg('resetMsg', 'Passwords do not match.', 'error'); return; }
+        if (password.length < 6) { showMsg('resetMsg', 'Password must be at least 6 characters.', 'error'); return; }
+
+        const btn = event.target;
+        btn.disabled = true; btn.textContent = 'Updating...';
+
+        try {
+            const res = await fetch('/api/auth/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: resetToken, password })
+            });
+            const data = await res.json();
+            if (!res.ok) { showMsg('resetMsg', data.error || 'Reset failed.', 'error'); return; }
+            showMsg('resetMsg', 'Password updated! Redirecting to login...', 'success');
+            setTimeout(() => window.location.href = '/login', 2000);
+        } catch(e) {
+            showMsg('resetMsg', 'Connection error. Please try again.', 'error');
+        }
+        btn.disabled = false; btn.textContent = 'Update Password →';
+    }
+
+    // ── ENTER KEY ──
+    document.addEventListener('keydown', e => {
+        if (e.key !== 'Enter') return;
+        const active = document.querySelector('.panel.active').id;
+        if (active === 'panel-login') handleLogin();
+        if (active === 'panel-signup') handleSignup();
+        if (active === 'panel-forgot') handleForgot();
+        if (active === 'panel-reset') handleReset();
+    });
+</script>
+<script>
+    document.getElementById('mobileMenu').addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('active');
+    });
+</script>
+
+<!-- Auth logout script (add this) -->
+<script>
+    fetch('/api/auth/me')
+        .then(r => r.json())
+        .then(data => {
+            const authLink = document.getElementById('authLink');
+            if (data.loggedIn) {
+                authLink.innerHTML = '<a href="#" onclick="logout()">Logout</a>';
+            } else {
+                authLink.innerHTML = '<a href="/login">Login</a>';
+            }
+        });
+    
+    function logout() {
+        fetch('/api/auth/logout', { method: 'POST' })
+            .then(() => window.location.href = '/');
+    }
+</script>
+</body>
+</html>

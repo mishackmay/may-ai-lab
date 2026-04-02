@@ -1,337 +1,533 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Business Dashboard - May AI Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
     <style>
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 2rem;
+        :root {
+            --brand: #1a6b4a;
+            --brand-light: #e8f5ee;
+            --brand-mid: #2d9467;
+            --accent: #f59e0b;
+            --accent-light: #fef3c7;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --bg: #f7f9f7;
+            --white: #ffffff;
+            --radius: 14px;
+            --shadow: 0 4px 24px rgba(26,107,74,0.08);
         }
-        
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); }
+
+        /* ── PAGE ── */
+        .page-wrap { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+        /* ── HEADER ── */
+        .dash-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+        }
+        .dash-header h1 { font-size: 1.6rem; font-weight: 800; }
+        .dash-header p { color: var(--text-muted); font-size: 0.875rem; margin-top: 0.2rem; }
+        .header-actions { display: flex; gap: 0.75rem; }
+        .btn-setup {
+            background: var(--brand-light); color: var(--brand);
+            border: none; font-family: inherit; font-size: 0.85rem; font-weight: 700;
+            padding: 0.65rem 1.25rem; border-radius: 10px; cursor: pointer;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;
+            transition: all 0.2s;
+        }
+        .btn-setup:hover { background: var(--brand); color: white; }
+
+        /* ── NOT LOGGED IN ── */
+        .not-logged {
+            background: var(--white); border-radius: var(--radius);
+            padding: 3rem; text-align: center; box-shadow: var(--shadow);
+        }
+        .not-logged .icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .not-logged h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .not-logged p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .not-logged a {
+            background: var(--brand); color: white; text-decoration: none;
+            padding: 0.75rem 2rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem;
+        }
+
+        /* ── STATS ROW ── */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 1rem; margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: var(--white); border-radius: var(--radius);
+            padding: 1.25rem 1.5rem; box-shadow: var(--shadow);
+            border: 1px solid rgba(26,107,74,0.06);
+        }
+        .stat-card .label { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+        .stat-card .value { font-size: 2rem; font-weight: 800; color: var(--text); }
+        .stat-card.pending .value { color: var(--accent); }
+        .stat-card.confirmed .value { color: var(--brand); }
+
+        /* ── TABS ── */
         .tabs {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 1rem;
+            display: flex; gap: 0.25rem;
+            background: var(--white); border-radius: 12px;
+            padding: 0.35rem; margin-bottom: 1.5rem;
+            box-shadow: var(--shadow); width: fit-content;
         }
-        
         .tab {
-            padding: 0.5rem 2rem;
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-size: 1rem;
-            color: #666;
+            padding: 0.6rem 1.25rem; border-radius: 8px;
+            font-size: 0.875rem; font-weight: 600; cursor: pointer;
+            border: none; background: none; font-family: inherit;
+            color: var(--text-muted); transition: all 0.2s;
+            display: flex; align-items: center; gap: 0.4rem;
         }
-        
-        .tab.active {
-            color: #667eea;
-            border-bottom: 3px solid #667eea;
+        .tab.active { background: var(--brand); color: white; }
+        .tab .badge {
+            background: var(--accent); color: white;
+            font-size: 0.65rem; font-weight: 800;
+            padding: 0.1rem 0.45rem; border-radius: 99px;
+            min-width: 18px; text-align: center;
         }
-        
-        .add-form {
-            background: #f5f5f5;
-            padding: 1.5rem;
-            border-radius: 5px;
-            margin-bottom: 2rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+        .tab.active .badge { background: white; color: var(--brand); }
+
+        /* ── BOOKING CARDS ── */
+        .bookings-list { display: flex; flex-direction: column; gap: 0.85rem; }
+
+        .booking-card {
+            background: var(--white); border-radius: var(--radius);
+            border: 2px solid var(--border); padding: 1.25rem 1.5rem;
+            display: flex; align-items: center; gap: 1.25rem;
+            transition: all 0.2s; box-shadow: var(--shadow);
         }
-        
-        .add-form input, .add-form select, .add-form button {
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        .booking-card:hover { border-color: var(--brand-mid); }
+        .booking-card.pending { border-left: 4px solid var(--accent); }
+        .booking-card.confirmed { border-left: 4px solid var(--brand); }
+        .booking-card.cancelled { border-left: 4px solid #ef4444; opacity: 0.7; }
+
+        .booking-date-block {
+            text-align: center; min-width: 52px;
+            background: var(--bg); border-radius: 10px; padding: 0.6rem 0.5rem;
+            flex-shrink: 0;
         }
-        
-        .add-form button {
-            background: #667eea;
-            color: white;
-            border: none;
-            cursor: pointer;
+        .booking-date-block .dayname { font-size: 0.6rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.1rem; }
+        .booking-date-block .day { font-size: 1.4rem; font-weight: 800; color: var(--brand); line-height: 1; }
+        .booking-date-block .month { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+
+        .booking-info { flex: 1; min-width: 0; }
+        .booking-info .service { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem; }
+        .booking-info .meta { font-size: 0.8rem; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 0.75rem; }
+        .booking-info .meta span { display: flex; align-items: center; gap: 0.3rem; }
+
+        .booking-status {
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px; padding: 0.3rem 0.75rem; border-radius: 99px;
+            flex-shrink: 0;
         }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
+        .status-pending { background: var(--accent-light); color: #92400e; }
+        .status-confirmed { background: var(--brand-light); color: var(--brand); }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+
+        .booking-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+        .btn-accept {
+            background: var(--brand); color: white; border: none;
+            font-family: inherit; font-size: 0.8rem; font-weight: 700;
+            padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;
+            transition: all 0.2s;
         }
-        
-        th, td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+        .btn-accept:hover { background: var(--brand-mid); }
+        .btn-decline {
+            background: #fee2e2; color: #ef4444; border: none;
+            font-family: inherit; font-size: 0.8rem; font-weight: 700;
+            padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;
+            transition: all 0.2s;
         }
-        
-        th {
-            background: #f5f5f5;
+        .btn-decline:hover { background: #fecaca; }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center; padding: 3rem 2rem;
+            background: var(--white); border-radius: var(--radius);
+            box-shadow: var(--shadow);
         }
-        
-        .status-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 3px;
-            font-size: 0.875rem;
+        .empty-state .icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .empty-state h3 { font-weight: 700; margin-bottom: 0.5rem; }
+        .empty-state p { color: var(--text-muted); font-size: 0.875rem; }
+
+        /* ── LOADING ── */
+        .loading-state {
+            text-align: center; padding: 3rem;
+            color: var(--text-muted); font-size: 0.9rem;
         }
-        
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-paid { background: #d4edda; color: #155724; }
+        .spinner {
+            width: 32px; height: 32px;
+            border: 3px solid var(--brand-light);
+            border-top-color: var(--brand);
+            border-radius: 50%; animation: spin 0.9s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--text); color: white; padding: 0.85rem 1.75rem;
+            border-radius: 12px; font-size: 0.9rem; font-weight: 600;
+            transition: transform 0.3s; z-index: 999; white-space: nowrap;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success { background: var(--brand); }
+        .toast.error { background: #ef4444; }
+
+        /* ── BOOKING LINK BOX ── */
+        .link-box {
+            background: var(--brand-light); border: 2px solid var(--brand);
+            border-radius: 12px; padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem; display: flex;
+            align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 1rem;
+        }
+        .link-box .left .label { font-size: 0.75rem; font-weight: 700; color: var(--brand); text-transform: uppercase; letter-spacing: 0.5px; }
+        .link-box .left .url { font-size: 0.875rem; color: var(--text); font-weight: 600; margin-top: 0.2rem; }
+        .link-box .right { display: flex; gap: 0.5rem; }
+        .btn-copy {
+            background: var(--brand); color: white; border: none;
+            font-family: inherit; font-size: 0.82rem; font-weight: 700;
+            padding: 0.6rem 1.1rem; border-radius: 8px; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-copy:hover { background: var(--brand-mid); }
+        .btn-view {
+            background: white; color: var(--brand); border: 2px solid var(--brand);
+            font-family: inherit; font-size: 0.82rem; font-weight: 700;
+            padding: 0.6rem 1.1rem; border-radius: 8px; cursor: pointer;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .btn-view:hover { background: var(--brand); color: white; }
+
+        @media (max-width: 600px) {
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .booking-card { flex-wrap: wrap; }
+            .booking-actions { width: 100%; }
+            .btn-accept, .btn-decline { flex: 1; text-align: center; }
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar">
+
+<nav class="navbar">
     <div class="logo">May AI Lab</div>
-    <ul class="nav-links">
+    <button class="mobile-menu" id="mobileMenu">☰</button>
+    <ul class="nav-links" id="navLinks">
         <li><a href="/">Home</a></li>
         <li><a href="/website-gen">Website Generator</a></li>
-        <li><a href="/business">Business Dashboard</a></li>
-        <li><a href="/troubleshooting">Troubleshooting</a></li>
-        <li><a href="/face-auth">Face Login</a></li>
+        <li><a href="/business">Dashboard</a></li>
+        <li><a href="/business-setup">Booking Setup</a></li>
+        <li><a href="/my-websites">My Websites</a></li>
         <li><a href="/pricing">Pricing</a></li>
+        <li><a href="/login">Login</a></li>
     </ul>
 </nav>
-    
-    <main>
-        <div class="dashboard-container">
-            <h1>Business Automation Dashboard</h1>
-            
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('customers')">Customers</button>
-                <button class="tab" onclick="switchTab('bookings')">Bookings</button>
-                <button class="tab" onclick="switchTab('invoices')">Invoices</button>
+<div class="nav-overlay" id="navOverlay"></div>
+
+<div class="toast" id="toast"></div>
+
+<main>
+<div class="page-wrap">
+
+    <!-- Not logged in -->
+    <div id="notLogged" style="display:none;">
+        <div class="not-logged">
+            <div class="icon">🔒</div>
+            <h2>Please log in first</h2>
+            <p>You need to be logged in to view your dashboard.</p>
+            <a href="/login">Log In</a>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" style="display:none;">
+
+        <!-- Header -->
+        <div class="dash-header">
+            <div>
+                <h1>📊 Business Dashboard</h1>
+                <p id="welcomeMsg">Welcome back!</p>
             </div>
-            
-            <div id="customers-view">
-                <div class="add-form">
-                    <input type="text" id="customerName" placeholder="Name">
-                    <input type="email" id="customerEmail" placeholder="Email">
-                    <input type="tel" id="customerPhone" placeholder="Phone">
-                    <button onclick="addCustomer()">Add Customer</button>
-                </div>
-                <table id="customers-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Created</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            
-            <div id="bookings-view" style="display: none;">
-                <div class="add-form">
-                    <select id="bookingCustomer">
-                        <option value="">Select Customer</option>
-                    </select>
-                    <input type="text" id="bookingService" placeholder="Service">
-                    <input type="date" id="bookingDate">
-                    <input type="time" id="bookingTime">
-                    <button onclick="addBooking()">Add Booking</button>
-                </div>
-                <table id="bookings-table">
-                    <thead>
-                        <tr>
-                            <th>Customer</th>
-                            <th>Service</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            
-            <div id="invoices-view" style="display: none;">
-                <div class="add-form">
-                    <select id="invoiceCustomer">
-                        <option value="">Select Customer</option>
-                    </select>
-                    <input type="number" id="invoiceAmount" placeholder="Amount" step="0.01">
-                    <button onclick="addInvoice()">Create Invoice</button>
-                </div>
-                <table id="invoices-table">
-                    <thead>
-                        <tr>
-                            <th>Customer</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <div class="header-actions">
+                <a href="/business-setup" class="btn-setup">⚙️ Edit Booking Setup</a>
             </div>
         </div>
-    </main>
+
+        <!-- Booking link -->
+        <div class="link-box" id="linkBox" style="display:none;">
+            <div class="left">
+                <div class="label">🔗 Your Booking Link</div>
+                <div class="url" id="bookingUrl">—</div>
+            </div>
+            <div class="right">
+                <button class="btn-copy" onclick="copyLink()">Copy Link</button>
+                <a class="btn-view" id="bookingViewLink" href="#" target="_blank">View Page →</a>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card pending">
+                <div class="label">Pending</div>
+                <div class="value" id="statPending">—</div>
+            </div>
+            <div class="stat-card confirmed">
+                <div class="label">Confirmed</div>
+                <div class="value" id="statConfirmed">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Total Bookings</div>
+                <div class="value" id="statTotal">—</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" id="tabPending" onclick="switchTab('pending')">
+                Pending <span class="badge" id="pendingBadge">0</span>
+            </button>
+            <button class="tab" id="tabConfirmed" onclick="switchTab('confirmed')">
+                Confirmed
+            </button>
+            <button class="tab" id="tabCancelled" onclick="switchTab('cancelled')">
+                Cancelled
+            </button>
+            <button class="tab" id="tabAll" onclick="switchTab('all')">
+                All Bookings
+            </button>
+        </div>
+
+        <!-- Bookings list -->
+        <div id="bookingsList">
+            <div class="loading-state">
+                <div class="spinner"></div>
+                Loading your bookings...
+            </div>
+        </div>
+
+    </div>
+</div>
+</main>
+
+<script>
+    let allBookings = [];
+    let currentTab = 'pending';
+    let currentUserId = null;
+
+    // ── INIT ──
+    async function init() {
+        try {
+            const res = await fetch('/api/auth/me');
+            const data = await res.json();
+            if (!data.loggedIn) {
+                document.getElementById('notLogged').style.display = 'block';
+                return;
+            }
+            currentUserId = data.userId;
+            document.getElementById('welcomeMsg').textContent = `Welcome back, ${data.username}!`;
+            document.getElementById('dashboard').style.display = 'block';
+            loadBookingLink();
+            loadBookings();
+        } catch(e) {
+            document.getElementById('notLogged').style.display = 'block';
+        }
+    }
+
+    // ── BOOKING LINK ──
+    async function loadBookingLink() {
+        try {
+            const res = await fetch(`/api/booking/profile/${currentUserId}`);
+            if (!res.ok) return;
+            const url = `${window.location.origin}/booking/${currentUserId}`;
+            document.getElementById('bookingUrl').textContent = url;
+            document.getElementById('bookingViewLink').href = url;
+            document.getElementById('linkBox').style.display = 'flex';
+        } catch(e) { /* no profile yet */ }
+    }
+
+    function copyLink() {
+        const url = `${window.location.origin}/booking/${currentUserId}`;
+        navigator.clipboard.writeText(url).then(() => showToast('Link copied! 📋', 'success'));
+    }
+
+    // ── LOAD BOOKINGS ──
+    async function loadBookings() {
+        try {
+            const res = await fetch('/api/booking/my-bookings');
+            if (!res.ok) throw new Error('Failed to load');
+            allBookings = await res.json();
+            updateStats();
+            renderBookings();
+        } catch(e) {
+            document.getElementById('bookingsList').innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">⚠️</div>
+                    <h3>Could not load bookings</h3>
+                    <p>Please refresh the page and try again.</p>
+                </div>`;
+        }
+    }
+
+    // ── STATS ──
+    function updateStats() {
+        const pending = allBookings.filter(b => b.status === 'pending').length;
+        const confirmed = allBookings.filter(b => b.status === 'confirmed').length;
+        document.getElementById('statPending').textContent = pending;
+        document.getElementById('statConfirmed').textContent = confirmed;
+        document.getElementById('statTotal').textContent = allBookings.length;
+        document.getElementById('pendingBadge').textContent = pending;
+        document.getElementById('pendingBadge').style.display = pending > 0 ? 'inline' : 'none';
+    }
+
+    // ── TABS ──
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        const tabId = `tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`;
+        document.getElementById(tabId).classList.add('active');
+        renderBookings();
+    }
+
+    // ── RENDER ──
+    function renderBookings() {
+        let filtered = allBookings;
+        if (currentTab === 'pending') filtered = allBookings.filter(b => b.status === 'pending');
+        if (currentTab === 'confirmed') filtered = allBookings.filter(b => b.status === 'confirmed');
+        if (currentTab === 'cancelled') filtered = allBookings.filter(b => b.status === 'cancelled');
+
+        const list = document.getElementById('bookingsList');
+
+        if (!filtered.length) {
+            const messages = {
+                pending: { icon: '🎉', title: 'No pending bookings', desc: 'All caught up! New booking requests will appear here.' },
+                confirmed: { icon: '📅', title: 'No confirmed bookings', desc: 'Accept pending bookings to see them here.' },
+                cancelled: { icon: '🗑️', title: 'No cancelled bookings', desc: 'Declined bookings will appear here.' },
+                all: { icon: '📋', title: 'No bookings yet', desc: 'Share your booking link to start receiving appointments.' }
+            };
+            const m = messages[currentTab];
+            list.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">${m.icon}</div>
+                    <h3>${m.title}</h3>
+                    <p>${m.desc}</p>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = `<div class="bookings-list">${filtered.map(b => bookingCard(b)).join('')}</div>`;
+    }
+
+    function bookingCard(b) {
+        const date = new Date(b.date + 'T00:00:00');
+        const day = date.getDate();
+        const month = date.toLocaleString('en-ZA', { month: 'short' });
+        const dayName = date.toLocaleString('en-ZA', { weekday: 'short' });
+        const fullDate = date.toLocaleDateString('en-ZA', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+        const statusClass = `status-${b.status}`;
+        const statusLabel = b.status.charAt(0).toUpperCase() + b.status.slice(1);
+
+        const actions = b.status === 'pending' ? `
+            <div class="booking-actions">
+                <button class="btn-accept" onclick="updateStatus(${b.id}, 'confirmed')">✓ Accept</button>
+                <button class="btn-decline" onclick="updateStatus(${b.id}, 'cancelled')">✗ Decline</button>
+            </div>` : '';
+
+        return `
+            <div class="booking-card ${b.status}" id="booking-${b.id}">
+                <div class="booking-date-block">
+                    <div class="dayname">${dayName}</div>
+                    <div class="day">${day}</div>
+                    <div class="month">${month}</div>
+                </div>
+                <div class="booking-info">
+                    <div class="service">${b.service}</div>
+                    <div class="meta">
+                        <span>🕐 ${b.time}</span>
+                        <span>👤 ${b.customer_name || 'Unknown'}</span>
+                        ${b.customer_phone ? `<span>📞 ${b.customer_phone}</span>` : ''}
+                        ${b.notes ? `<span>📝 ${b.notes}</span>` : ''}
+                    </div>
+                </div>
+                <div class="booking-status ${statusClass}">${statusLabel}</div>
+                ${actions}
+            </div>`;
+    }
+
+    // ── UPDATE STATUS ──
+    async function updateStatus(bookingId, status) {
+        try {
+            const res = await fetch('/api/booking/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ booking_id: bookingId, status })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error);
+
+            // Update locally
+            const booking = allBookings.find(b => b.id === bookingId);
+            if (booking) booking.status = status;
+            updateStats();
+            renderBookings();
+            showToast(status === 'confirmed' ? '✅ Booking confirmed!' : '❌ Booking declined', status === 'confirmed' ? 'success' : 'error');
+        } catch(e) {
+            showToast('Something went wrong. Try again.', 'error');
+        }
+    }
+
+    // ── TOAST ──
+    function showToast(msg, type = '') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = `toast ${type} show`;
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ── MOBILE MENU ──
+    document.getElementById('mobileMenu').addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('active');
+    });
+
+    // ── AUTO REFRESH every 60 seconds ──
+    setInterval(loadBookings, 60000);
+
+    init();
+</script>
+<script>
+    document.getElementById('mobileMenu').addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('active');
+    });
+</script>
+
+<!-- Auth logout script (add this) -->
+<script>
+    fetch('/api/auth/me')
+        .then(r => r.json())
+        .then(data => {
+            const authLink = document.getElementById('authLink');
+            if (data.loggedIn) {
+                authLink.innerHTML = '<a href="#" onclick="logout()">Logout</a>';
+            } else {
+                authLink.innerHTML = '<a href="/login">Login</a>';
+            }
+        });
     
-    <script>
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('[id$="-view"]').forEach(v => v.style.display = 'none');
-            
-            document.querySelector(`.tab[onclick*="${tab}"]`).classList.add('active');
-            document.getElementById(`${tab}-view`).style.display = 'block';
-            
-            loadData();
-        }
-        
-        async function loadData() {
-            await loadCustomers();
-            await loadBookings();
-            await loadInvoices();
-        }
-        
-        async function loadCustomers() {
-            try {
-                const response = await fetch('/api/business/customers');
-                const customers = await response.json();
-                
-                // Update customers table
-                const tbody = document.querySelector('#customers-table tbody');
-                tbody.innerHTML = customers.map(c => `
-                    <tr>
-                        <td>${c.name}</td>
-                        <td>${c.email}</td>
-                        <td>${c.phone}</td>
-                        <td>${new Date(c.created_at).toLocaleDateString()}</td>
-                    </tr>
-                `).join('');
-                
-                // Update dropdowns
-                const options = customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-                document.getElementById('bookingCustomer').innerHTML = '<option value="">Select Customer</option>' + options;
-                document.getElementById('invoiceCustomer').innerHTML = '<option value="">Select Customer</option>' + options;
-            } catch (error) {
-                console.error('Error loading customers:', error);
-            }
-        }
-        
-        async function loadBookings() {
-            try {
-                const response = await fetch('/api/business/bookings');
-                const bookings = await response.json();
-                
-                const tbody = document.querySelector('#bookings-table tbody');
-                tbody.innerHTML = bookings.map(b => `
-                    <tr>
-                        <td>${b.customer_name}</td>
-                        <td>${b.service}</td>
-                        <td>${b.date}</td>
-                        <td>${b.time}</td>
-                        <td><span class="status-badge status-${b.status}">${b.status}</span></td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading bookings:', error);
-            }
-        }
-        
-        async function loadInvoices() {
-            try {
-                const response = await fetch('/api/business/invoices');
-                const invoices = await response.json();
-                
-                const tbody = document.querySelector('#invoices-table tbody');
-                tbody.innerHTML = invoices.map(i => `
-                    <tr>
-                        <td>${i.customer_name}</td>
-                        <td>$${i.amount}</td>
-                        <td><span class="status-badge status-${i.status}">${i.status}</span></td>
-                        <td>${new Date(i.created_at).toLocaleDateString()}</td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading invoices:', error);
-            }
-        }
-        
-        async function addCustomer() {
-            const name = document.getElementById('customerName').value;
-            const email = document.getElementById('customerEmail').value;
-            const phone = document.getElementById('customerPhone').value;
-            
-            if (!name || !email) {
-                alert('Name and email are required');
-                return;
-            }
-            
-            try {
-                await fetch('/api/business/customers', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, phone })
-                });
-                
-                document.getElementById('customerName').value = '';
-                document.getElementById('customerEmail').value = '';
-                document.getElementById('customerPhone').value = '';
-                
-                loadCustomers();
-            } catch (error) {
-                console.error('Error adding customer:', error);
-            }
-        }
-        
-        async function addBooking() {
-            const customer_id = document.getElementById('bookingCustomer').value;
-            const service = document.getElementById('bookingService').value;
-            const date = document.getElementById('bookingDate').value;
-            const time = document.getElementById('bookingTime').value;
-            
-            if (!customer_id || !service || !date || !time) {
-                alert('All fields are required');
-                return;
-            }
-            
-            try {
-                await fetch('/api/business/bookings', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ customer_id, service, date, time })
-                });
-                
-                document.getElementById('bookingService').value = '';
-                document.getElementById('bookingDate').value = '';
-                document.getElementById('bookingTime').value = '';
-                
-                loadBookings();
-            } catch (error) {
-                console.error('Error adding booking:', error);
-            }
-        }
-        
-        async function addInvoice() {
-            const customer_id = document.getElementById('invoiceCustomer').value;
-            const amount = document.getElementById('invoiceAmount').value;
-            
-            if (!customer_id || !amount) {
-                alert('All fields are required');
-                return;
-            }
-            
-            try {
-                await fetch('/api/business/invoices', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ customer_id, amount })
-                });
-                
-                document.getElementById('invoiceAmount').value = '';
-                loadInvoices();
-            } catch (error) {
-                console.error('Error adding invoice:', error);
-            }
-        }
-        
-        // Initial load
-        loadData();
-    </script>
+    function logout() {
+        fetch('/api/auth/logout', { method: 'POST' })
+            .then(() => window.location.href = '/');
+    }
+</script>
 </body>
 </html>

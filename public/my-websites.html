@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Websites - May AI Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        :root {
+            --brand: #1a6b4a;
+            --brand-light: #e8f5ee;
+            --brand-mid: #2d9467;
+            --accent: #f59e0b;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --bg: #f7f9f7;
+            --white: #ffffff;
+            --radius: 14px;
+            --shadow: 0 4px 24px rgba(26,107,74,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); }
+
+        .page-wrap { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+        /* ── HEADER ── */
+        .page-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+        }
+        .page-header h1 { font-size: 1.6rem; font-weight: 800; }
+        .page-header p { color: var(--text-muted); font-size: 0.875rem; margin-top: 0.25rem; }
+        .btn-new {
+            background: var(--brand); color: white; text-decoration: none;
+            font-family: inherit; font-size: 0.875rem; font-weight: 700;
+            padding: 0.7rem 1.5rem; border-radius: 10px;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            transition: all 0.2s;
+        }
+        .btn-new:hover { background: var(--brand-mid); transform: translateY(-1px); }
+
+        /* ── NOT LOGGED IN ── */
+        .not-logged {
+            background: var(--white); border-radius: var(--radius);
+            padding: 3rem; text-align: center; box-shadow: var(--shadow);
+        }
+        .not-logged .icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .not-logged h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .not-logged p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .not-logged a {
+            background: var(--brand); color: white; text-decoration: none;
+            padding: 0.75rem 2rem; border-radius: 10px; font-weight: 700;
+        }
+
+        /* ── STATS ── */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 1rem; margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: var(--white); border-radius: var(--radius);
+            padding: 1.25rem 1.5rem; box-shadow: var(--shadow);
+            border: 1px solid rgba(26,107,74,0.06);
+        }
+        .stat-card .label { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+        .stat-card .value { font-size: 2rem; font-weight: 800; color: var(--brand); }
+
+        /* ── WEBSITE GRID ── */
+        .websites-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .website-card {
+            background: var(--white); border-radius: var(--radius);
+            border: 2px solid var(--border); overflow: hidden;
+            box-shadow: var(--shadow); transition: all 0.2s;
+        }
+        .website-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(26,107,74,0.12); border-color: var(--brand-mid); }
+
+        .website-card-top {
+            height: 100px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem; position: relative;
+        }
+        .website-card-body { padding: 1.1rem; }
+        .website-card-body .biz-name { font-weight: 800; font-size: 1rem; margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .website-card-body .biz-type { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; margin-bottom: 0.6rem; }
+        .website-card-body .biz-meta { display: flex; justify-content: space-between; align-items: center; }
+        .website-card-body .biz-date { font-size: 0.72rem; color: var(--text-muted); }
+        .website-card-body .biz-location { font-size: 0.72rem; color: var(--text-muted); }
+
+        .card-actions {
+            padding: 0.85rem 1.1rem;
+            border-top: 1px solid var(--border);
+            display: flex; gap: 0.5rem;
+        }
+        .btn-regenerate {
+            flex: 1; background: var(--brand-light); color: var(--brand);
+            border: none; font-family: inherit; font-size: 0.78rem; font-weight: 700;
+            padding: 0.55rem; border-radius: 8px; cursor: pointer;
+            transition: all 0.2s; text-align: center;
+        }
+        .btn-regenerate:hover { background: var(--brand); color: white; }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center; padding: 4rem 2rem;
+            background: var(--white); border-radius: var(--radius);
+            box-shadow: var(--shadow); grid-column: 1 / -1;
+        }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .empty-state h3 { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .empty-state p { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem; }
+        .empty-state a {
+            background: var(--brand); color: white; text-decoration: none;
+            padding: 0.75rem 2rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem;
+        }
+
+        /* ── LOADING ── */
+        .loading-state {
+            text-align: center; padding: 3rem;
+            color: var(--text-muted);
+        }
+        .spinner {
+            width: 32px; height: 32px;
+            border: 3px solid var(--brand-light);
+            border-top-color: var(--brand);
+            border-radius: 50%; animation: spin 0.9s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── FREE TIER BANNER ── */
+        .tier-banner {
+            background: linear-gradient(135deg, var(--brand), var(--brand-mid));
+            border-radius: var(--radius); padding: 1.25rem 1.5rem;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; color: white;
+        }
+        .tier-banner .left .title { font-weight: 800; font-size: 0.95rem; margin-bottom: 0.2rem; }
+        .tier-banner .left .desc { font-size: 0.8rem; opacity: 0.85; }
+        .tier-banner a {
+            background: white; color: var(--brand);
+            text-decoration: none; font-weight: 800; font-size: 0.82rem;
+            padding: 0.55rem 1.25rem; border-radius: 8px;
+            white-space: nowrap; transition: all 0.2s;
+        }
+        .tier-banner a:hover { background: var(--accent); color: white; }
+
+        @media (max-width: 600px) {
+            .stats-row { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">May AI Lab</div>
+    <button class="mobile-menu" id="mobileMenu">☰</button>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="/">Home</a></li>
+        <li><a href="/website-gen">Website Generator</a></li>
+        <li><a href="/my-websites">My Websites</a></li>
+        <li><a href="/business">Dashboard</a></li>
+        <li><a href="/business-setup">Booking Setup</a></li>
+        <li><a href="/my-websites">My Websites</a></li>
+        <li><a href="/pricing">Pricing</a></li>
+        <li><a href="/login" id="authLink">Login</a></li>
+    </ul>
+</nav>
+<div class="nav-overlay" id="navOverlay"></div>
+
+<main>
+<div class="page-wrap">
+
+    <!-- Not logged in -->
+    <div id="notLogged" style="display:none;">
+        <div class="not-logged">
+            <div class="icon">🔒</div>
+            <h2>Please log in first</h2>
+            <p>You need to be logged in to see your websites.</p>
+            <a href="/login">Log In</a>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="mainContent" style="display:none;">
+
+        <!-- Header -->
+        <div class="page-header">
+            <div>
+                <h1>🌐 My Websites</h1>
+                <p id="welcomeMsg">Your generated websites</p>
+            </div>
+            <a href="/website-gen" class="btn-new">+ Generate New Website</a>
+        </div>
+
+        <!-- Free tier banner -->
+        <div class="tier-banner">
+            <div class="left">
+                <div class="title">🚀 You're on the Free plan</div>
+                <div class="desc">Upgrade to generate unlimited websites and unlock premium templates</div>
+            </div>
+            <a href="/pricing">See Paid Plans →</a>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="label">Total Generated</div>
+                <div class="value" id="statTotal">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">This Month</div>
+                <div class="value" id="statMonth">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Remaining Today</div>
+                <div class="value" id="statRemaining">—</div>
+            </div>
+        </div>
+
+        <!-- Websites grid -->
+        <div class="websites-grid" id="websitesGrid">
+            <div class="loading-state">
+                <div class="spinner"></div>
+                Loading your websites...
+            </div>
+        </div>
+
+    </div>
+</div>
+</main>
+
+<script>
+    const BUSINESS_ICONS = {
+        'Hair Salon': '💇', 'Restaurant': '🍽️', 'Gym': '💪',
+        'Coffee Shop': '☕', 'Bakery': '🥐', 'Salon': '💄',
+        'Spa': '🧖', 'Tech Company': '💻', 'Real Estate': '🏠',
+        'Cleaning Service': '🧹', 'Auto Repair': '🔧', 'Pet Store': '🐾',
+        'Fashion Boutique': '👗', 'Security': '🛡️', 'Plumbing': '🔩',
+        'Pizza Place': '🍕', 'Donut Shop': '🍩', 'E-commerce': '🛒',
+        'default': '🌐'
+    };
+
+    const BG_COLORS = [
+        '#e8f5ee', '#fef3c7', '#ede9fe', '#fce7f3', '#dbeafe',
+        '#d1fae5', '#ffedd5', '#f0fdf4'
+    ];
+
+    async function init() {
+        try {
+            const res = await fetch('/api/auth/me');
+            const data = await res.json();
+            if (!data.loggedIn) {
+                document.getElementById('notLogged').style.display = 'block';
+                return;
+            }
+            document.getElementById('welcomeMsg').textContent = `Welcome back, ${data.username}!`;
+            document.getElementById('mainContent').style.display = 'block';
+
+            // Update auth link to show logout
+            const authLink = document.getElementById('authLink');
+            if (authLink) {
+                authLink.textContent = 'Logout';
+                authLink.href = '#';
+                authLink.onclick = logout;
+            }
+
+            loadWebsites();
+            loadRemaining();
+        } catch(e) {
+            document.getElementById('notLogged').style.display = 'block';
+        }
+    }
+
+    async function loadWebsites() {
+        try {
+            const res = await fetch('/api/websites/my');
+            const websites = await res.json();
+
+            // Stats
+            const now = new Date();
+            const thisMonth = websites.filter(w => {
+                const d = new Date(w.created_at);
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            }).length;
+
+            document.getElementById('statTotal').textContent = websites.length;
+            document.getElementById('statMonth').textContent = thisMonth;
+
+            // Render grid
+            const grid = document.getElementById('websitesGrid');
+            if (!websites.length) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">🌐</div>
+                        <h3>No websites yet</h3>
+                        <p>Generate your first AI-powered website in minutes.</p>
+                        <a href="/website-gen">Generate a Website →</a>
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = websites.map((w, i) => {
+                const icon = BUSINESS_ICONS[w.business_type] || BUSINESS_ICONS.default;
+                const bg = BG_COLORS[i % BG_COLORS.length];
+                const date = new Date(w.created_at).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' });
+                return `
+                    <div class="website-card">
+                        <div class="website-card-top" style="background:${bg};">
+                            ${icon}
+                        </div>
+                        <div class="website-card-body">
+                            <div class="biz-name">${w.business_name || 'Unnamed Business'}</div>
+                            <div class="biz-type">${w.business_type || 'Business'}</div>
+                            <div class="biz-meta">
+                                <span class="biz-location">📍 ${w.location || '—'}</span>
+                                <span class="biz-date">${date}</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-regenerate" onclick="regenerate(${w.id})">🔄 Regenerate</button>
+                        </div>
+                    </div>`;
+            }).join('');
+        } catch(e) {
+            document.getElementById('websitesGrid').innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">⚠️</div>
+                    <h3>Could not load websites</h3>
+                    <p>Please refresh and try again.</p>
+                </div>`;
+        }
+    }
+
+    async function loadRemaining() {
+        try {
+            const res = await fetch('/api/remaining-generations');
+            const data = await res.json();
+            document.getElementById('statRemaining').textContent = data.remaining;
+        } catch(e) {
+            document.getElementById('statRemaining').textContent = '—';
+        }
+    }
+
+    function regenerate(id) {
+        window.location.href = `/website-gen?regenerate=${id}`;
+    }
+
+    async function logout() {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        window.location.href = '/login';
+    }
+
+    document.getElementById('mobileMenu').addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('active');
+    });
+
+    init();
+</script>
+<script>
+    document.getElementById('mobileMenu').addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('active');
+    });
+</script>
+
+<!-- Auth logout script (add this) -->
+<script>
+    fetch('/api/auth/me')
+        .then(r => r.json())
+        .then(data => {
+            const authLink = document.getElementById('authLink');
+            if (data.loggedIn) {
+                authLink.innerHTML = '<a href="#" onclick="logout()">Logout</a>';
+            } else {
+                authLink.innerHTML = '<a href="/login">Login</a>';
+            }
+        });
+    
+    function logout() {
+        fetch('/api/auth/logout', { method: 'POST' })
+            .then(() => window.location.href = '/');
+    }
+</script>
+</body>
+</html>

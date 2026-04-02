@@ -1,103 +1,41 @@
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const axios = require('axios');
 
 class TroubleshootingAI {
     constructor() {
-        this.ollamaUrl = 'http://localhost:11434/api/generate';
+        this.ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
         this.model = process.env.OLLAMA_MODEL || 'mistral';
     }
 
     async solve(problem) {
         try {
-            const result = await this.askAI(problem);
+            const response = await axios.post(`${this.ollamaUrl}/api/generate`, {
+                model: this.model,
+                prompt: `You are a helpful troubleshooting assistant. A user has the following problem: "${problem}". Provide clear, step-by-step instructions to solve this problem. Be concise and practical.`,
+                stream: false
+            }, { timeout: 120000 });
 
             return {
-                questions: result.questions,
-                steps: result.steps
+                solution: response.data.response,
+                steps: this.parseSteps(response.data.response)
             };
-
         } catch (error) {
-            console.error("SOLVE ERROR:", error.message);
-
+            // Fallback if Ollama is not running
             return {
-                questions: ["Can you explain the issue in more detail?"],
-                steps: [
-                    { title: "Restart Device", description: "Turn it off and on again." },
-                    { title: "Check Connections", description: "Ensure all cables are properly connected." }
-                ]
+                solution: `I was unable to connect to the AI model to solve: "${problem}". Please make sure Ollama is running locally, or check back when the cloud AI is connected.`,
+                steps: []
             };
         }
     }
 
-    async askAI(problem) {
-        const response = await fetch(this.ollamaUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: this.model,
-                prompt: `
-You are a professional IT technician.
-
-STRICT RULES:
-- ALWAYS ask 1-2 diagnostic questions FIRST
-- THEN provide troubleshooting steps
-- DO NOT skip questions
-- DO NOT add explanations outside JSON
-- OUTPUT MUST BE VALID JSON ONLY
-
-FORMAT:
-
-{
-  "questions": [
-    "Question 1",
-    "Question 2"
-  ],
-  "steps": [
-    {"title": "Step 1", "description": "..."},
-    {"title": "Step 2", "description": "..."}
-  ]
-}
-
-User problem: ${problem}
-                `,
-                stream: false,
-                temperature: 0
-            })
-        });
-
-        const data = await response.json();
-
-        // 🔍 DEBUG: See EXACTLY what Ollama returns
-        console.log("=== AI RAW RESPONSE ===");
-        console.log(data.response);
-        console.log("=======================");
-
-        try {
-            // Extract JSON safely
-            const match = data.response.match(/\{[\s\S]*\}/);
-
-            if (!match) throw new Error("No JSON found");
-
-            const parsed = JSON.parse(match[0]);
-
-            // Validate structure
-            if (!parsed.questions || !parsed.steps) {
-                throw new Error("Invalid structure");
+    parseSteps(text) {
+        const lines = text.split('\n').filter(l => l.trim());
+        const steps = [];
+        lines.forEach(line => {
+            if (/^\d+[\.\)]/.test(line.trim()) || /^[-*]/.test(line.trim())) {
+                steps.push(line.replace(/^\d+[\.\)]\s*/, '').replace(/^[-*]\s*/, '').trim());
             }
-
-            return parsed;
-
-        } catch (err) {
-            console.error("JSON PARSE FAILED:", err.message);
-
-            // 🔁 Fallback if AI fails
-            return {
-                questions: ["Can you describe the issue more clearly?"],
-                steps: [
-                    { title: "Restart Device", description: "Turn it off and on again." },
-                    { title: "Check Connections", description: "Ensure everything is properly connected." }
-                ]
-            };
-        }
+        });
+        return steps;
     }
 }
 

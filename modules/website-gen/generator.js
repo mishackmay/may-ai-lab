@@ -54,7 +54,9 @@ class WebsiteGenerator {
                 customAbout: userInputs.customAbout || null,
                 serviceDescriptions: userInputs.serviceDescriptions || null,
                 customHeroImage: userInputs?.customHeroImage || null,
-                customAboutImage: userInputs?.customAboutImage || null
+                customAboutImage: userInputs?.customAboutImage || null,
+                bookingUserId: userInputs.bookingUserId || null,
+                bookingUrl: userInputs.bookingUrl || null,
             };
         }
         
@@ -606,20 +608,19 @@ async generateModernHTML(details, filename) {
 </head>
 <body>
     <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                ${logoHtml}
-            </div>
-            <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-            <div class="mobile-menu"><i class="fas fa-bars"></i></div>
-        </div>
-    </nav>
-    <div class="nav-overlay" id="navOverlay"></div>
+    <div class="logo">May AI Lab</div>
+    <button class="mobile-menu" id="mobileMenu">☰</button>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="/">Home</a></li>
+        <li><a href="/website-gen">Website Generator</a></li>
+        <li><a href="/business">Dashboard</a></li>
+        <li><a href="/business-setup">Booking Setup</a></li>
+        <li><a href="/my-websites">My Websites</a></li>
+        <li><a href="/pricing">Pricing</a></li>
+        <li><a href="/login">Login</a></li>
+    </ul>
+</nav>
+<div class="nav-overlay" id="navOverlay"></div>
 
     <section id="home" class="hero" style="background: linear-gradient(135deg, ${details.primaryColor}cc, ${details.secondaryColor}cc), url('${heroImage}'); background-size: cover; background-position: center;">
         <div class="hero-content">
@@ -628,8 +629,10 @@ async generateModernHTML(details, filename) {
                 <p class="hero-subtitle">${details.tagline}</p>
                 <p class="hero-description">📍 ${details.location}</p>
                 <div class="hero-buttons">
-                    <a href="#services" class="btn-primary">Explore Services</a>
-                    <a href="${whatsappUrl}" class="btn-whatsapp" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp Us</a>
+                   <div class="hero-buttons">
+    <a href="#services" class="btn-primary">Explore Services</a>
+    ${details.bookingUserId ? `<a href="${details.bookingUrl || '#'}" class="btn-booking" target="_blank"><i class="fas fa-calendar-check"></i> Book Now</a>` : ''}
+    <a href="${whatsappUrl}" class="btn-whatsapp" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp Us</a>
                 </div>
             </div>
         </div>
@@ -738,6 +741,30 @@ async generateModernHTML(details, filename) {
             navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
         }
     </script>
+<script>
+    document.getElementById('mobileMenu').addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('active');
+    });
+</script>
+
+<!-- Auth logout script (add this) -->
+<script>
+    fetch('/api/auth/me')
+        .then(r => r.json())
+        .then(data => {
+            const authLink = document.getElementById('authLink');
+            if (data.loggedIn) {
+                authLink.innerHTML = '<a href="#" onclick="logout()">Logout</a>';
+            } else {
+                authLink.innerHTML = '<a href="/login">Login</a>';
+            }
+        });
+    
+    function logout() {
+        fetch('/api/auth/logout', { method: 'POST' })
+            .then(() => window.location.href = '/');
+    }
+</script>
 </body>
 </html>`;
 }
@@ -850,7 +877,7 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 8rem 2rem;
+    padding: 120px 2rem 8rem;
     position: relative;
 }
 
@@ -894,6 +921,7 @@ body {
     gap: 1rem;
     justify-content: center;
     flex-wrap: wrap;
+    margin-bottom: 4rem;
 }
 
 .btn-primary {
@@ -921,6 +949,26 @@ body {
     border-radius: 50px;
     font-weight: 600;
     transition: all 0.3s;
+}
+
+.btn-booking {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: ${details.primaryColor};
+    color: white;
+    padding: 0.85rem 2rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1rem;
+    border: 2px solid white;
+    transition: all 0.3s;
+}
+.btn-booking:hover {
+    background: white;
+    color: ${details.primaryColor};
+    transform: translateY(-2px);
 }
 
 .btn-whatsapp:hover {

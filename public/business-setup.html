@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Setup - May AI Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        :root {
+            --brand: #1a6b4a;
+            --brand-light: #e8f5ee;
+            --brand-mid: #2d9467;
+            --accent: #f59e0b;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --bg: #f7f9f7;
+            --white: #ffffff;
+            --radius: 14px;
+            --shadow: 0 4px 24px rgba(26,107,74,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); }
+
+        .page-wrap { max-width: 640px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+        .page-header { margin-bottom: 2rem; }
+        .page-header .badge {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: var(--brand-light); color: var(--brand);
+            font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.85rem;
+            border-radius: 99px; text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+        }
+        .page-header h1 { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.35rem; }
+        .page-header p { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* ── NOT LOGGED IN ── */
+        .not-logged {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        .not-logged .icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .not-logged h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .not-logged p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .not-logged a {
+            background: var(--brand); color: white; text-decoration: none;
+            padding: 0.75rem 2rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem;
+        }
+
+        /* ── SECTION CARD ── */
+        .section-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(26,107,74,0.06);
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+        }
+        .section-head {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 0.75rem;
+        }
+        .section-head .icon { font-size: 1.3rem; }
+        .section-head h2 { font-size: 1rem; font-weight: 700; }
+        .section-head p { font-size: 0.8rem; color: var(--text-muted); }
+        .section-body { padding: 1.5rem; }
+
+        /* ── FIELDS ── */
+        .field { margin-bottom: 1.1rem; }
+        .field:last-child { margin-bottom: 0; }
+        .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; }
+        .field label .opt { font-weight: 400; color: var(--text-muted); }
+        .field input, .field select {
+            width: 100%; padding: 0.75rem 1rem;
+            border: 2px solid var(--border); border-radius: 10px;
+            font-family: inherit; font-size: 0.9rem; color: var(--text);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .field input:focus, .field select:focus {
+            outline: none; border-color: var(--brand);
+            box-shadow: 0 0 0 3px var(--brand-light);
+        }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+        /* ── DAYS ── */
+        .days-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .day-chip {
+            padding: 0.5rem 1rem; border-radius: 99px;
+            border: 2px solid var(--border); font-size: 0.82rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; user-select: none;
+        }
+        .day-chip:hover { border-color: var(--brand-mid); background: var(--brand-light); }
+        .day-chip.selected { background: var(--brand); border-color: var(--brand); color: white; }
+
+        /* ── SERVICES ── */
+        .services-list { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 0.75rem; }
+        .service-row { display: flex; gap: 0.5rem; align-items: center; }
+        .service-row input { flex: 1; }
+        .remove-btn {
+            width: 34px; height: 34px; border-radius: 8px;
+            background: #fee2e2; color: #ef4444; border: none;
+            cursor: pointer; font-size: 1.1rem; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .remove-btn:hover { background: #fecaca; }
+        .add-btn {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: none; border: 2px dashed var(--brand-mid);
+            color: var(--brand); font-family: inherit; font-size: 0.85rem;
+            font-weight: 600; padding: 0.5rem 1rem; border-radius: 10px; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .add-btn:hover { background: var(--brand-light); }
+
+        /* ── BOOKING LINK ── */
+        .link-box {
+            background: var(--brand-light);
+            border: 2px solid var(--brand);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-top: 1.25rem;
+            display: none;
+        }
+        .link-box.show { display: block; }
+        .link-box .label { font-size: 0.8rem; font-weight: 700; color: var(--brand); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+        .link-row { display: flex; gap: 0.5rem; align-items: center; }
+        .link-row input {
+            flex: 1; padding: 0.65rem 0.9rem;
+            border: 1px solid var(--border); border-radius: 8px;
+            font-size: 0.85rem; background: white; color: var(--text);
+        }
+        .copy-btn {
+            background: var(--brand); color: white; border: none;
+            padding: 0.65rem 1rem; border-radius: 8px; font-family: inherit;
+            font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+            transition: background 0.2s;
+        }
+        .copy-btn:hover { background: var(--brand-mid); }
+        .link-hint { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+        /* ── SAVE BUTTON ── */
+        .save-wrap { margin-top: 1.5rem; }
+        .btn-save {
+            width: 100%; background: linear-gradient(135deg, var(--brand), var(--brand-mid));
+            color: white; border: none; font-family: inherit; font-size: 1rem;
+            font-weight: 700; padding: 1rem; border-radius: 12px; cursor: pointer;
+            transition: all 0.2s; box-shadow: 0 4px 14px rgba(26,107,74,0.25);
+        }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,107,74,0.35); }
+        .btn-save:disabled { background: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .toast {
+            position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--text); color: white; padding: 0.85rem 1.75rem;
+            border-radius: 12px; font-size: 0.9rem; font-weight: 600;
+            transition: transform 0.3s; z-index: 999; white-space: nowrap;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success { background: var(--brand); }
+        .toast.error { background: #ef4444; }
+
+        @media (max-width: 520px) { .two-col { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">May AI Lab</div>
+    <button class="mobile-menu" id="mobileMenu">☰</button>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="/">Home</a></li>
+        <li><a href="/website-gen">Website Generator</a></li>
+        <li><a href="/business">Dashboard</a></li>
+        <li><a href="/business-setup">Booking Setup</a></li>
+        <li><a href="/my-websites">My Websites</a></li>
+        <li><a href="/pricing">Pricing</a></li>
+        <li><a href="/login">Login</a></li>
+    </ul>
+</nav>
+<div class="nav-overlay" id="navOverlay"></div>
+
+<div class="toast" id="toast"></div>
+
+<main>
+<div class="page-wrap">
+
+    <div class="page-header">
+        <div class="badge">⚙️ Setup</div>
+        <h1>Booking Page Setup</h1>
+        <p>Set up your booking page so customers can schedule appointments with you.</p>
+    </div>
+
+    <!-- Not logged in state -->
+    <div id="notLogged" style="display:none;">
+        <div class="not-logged">
+            <div class="icon">🔒</div>
+            <h2>Please log in first</h2>
+            <p>You need to be logged in to set up your booking page.</p>
+            <a href="/login">Log In</a>
+        </div>
+    </div>
+
+    <!-- Setup form -->
+    <div id="setupForm" style="display:none;">
+
+        <!-- Business Info -->
+        <div class="section-card">
+            <div class="section-head">
+                <span class="icon">🏢</span>
+                <div>
+                    <h2>Business Info</h2>
+                    <p>Basic details shown on your booking page</p>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="field">
+                    <label>Business Name</label>
+                    <input type="text" id="bizName" placeholder="e.g., Thabo's Hair Salon">
+                </div>
+                <div class="two-col">
+                    <div class="field">
+                        <label>Phone Number</label>
+                        <input type="tel" id="bizPhone" placeholder="+27 79 123 4567">
+                    </div>
+                    <div class="field">
+                        <label>WhatsApp Number</label>
+                        <input type="tel" id="bizWhatsapp" placeholder="+27 79 123 4567">
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.3rem;">Customers will message you here after booking</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services -->
+        <div class="section-card">
+            <div class="section-head">
+                <span class="icon">🛠️</span>
+                <div>
+                    <h2>Your Services</h2>
+                    <p>What can customers book with you?</p>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="services-list" id="servicesList">
+                    <div class="service-row">
+                        <input type="text" class="service-field" placeholder="e.g., Haircut">
+                    </div>
+                    <div class="service-row">
+                        <input type="text" class="service-field" placeholder="e.g., Braiding">
+                        <button class="remove-btn" onclick="removeService(this)">×</button>
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addService()">+ Add service</button>
+            </div>
+        </div>
+
+        <!-- Availability -->
+        <div class="section-card">
+            <div class="section-head">
+                <span class="icon">📅</span>
+                <div>
+                    <h2>Availability</h2>
+                    <p>When are you open for bookings?</p>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="field">
+                    <label>Available Days</label>
+                    <div class="days-grid" id="daysGrid">
+                        <div class="day-chip selected" data-day="Monday" onclick="toggleDay(this)">Mon</div>
+                        <div class="day-chip selected" data-day="Tuesday" onclick="toggleDay(this)">Tue</div>
+                        <div class="day-chip selected" data-day="Wednesday" onclick="toggleDay(this)">Wed</div>
+                        <div class="day-chip selected" data-day="Thursday" onclick="toggleDay(this)">Thu</div>
+                        <div class="day-chip selected" data-day="Friday" onclick="toggleDay(this)">Fri</div>
+                        <div class="day-chip" data-day="Saturday" onclick="toggleDay(this)">Sat</div>
+                        <div class="day-chip" data-day="Sunday" onclick="toggleDay(this)">Sun</div>
+                    </div>
+                </div>
+                <div class="two-col" style="margin-top:1rem;">
+                    <div class="field">
+                        <label>Opening Time</label>
+                        <input type="time" id="startTime" value="08:00">
+                    </div>
+                    <div class="field">
+                        <label>Closing Time</label>
+                        <input type="time" id="endTime" value="17:00">
+                    </div>
+                </div>
+                <div class="field" style="margin-top:1rem;">
+                    <label>Appointment Duration</label>
+                    <select id="slotDuration">
+                        <option value="30">30 minutes</option>
+                        <option value="45">45 minutes</option>
+                        <option value="60" selected>1 hour</option>
+                        <option value="90">1.5 hours</option>
+                        <option value="120">2 hours</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save -->
+        <div class="save-wrap">
+            <button class="btn-save" id="saveBtn" onclick="saveProfile()">💾 Save & Get My Booking Link</button>
+        </div>
+
+        <!-- Booking link -->
+        <div class="link-box" id="linkBox">
+            <div class="label">🔗 Your Booking Link</div>
+            <div class="link-row">
+                <input type="text" id="bookingLink" readonly>
+                <button class="copy-btn" onclick="copyLink()">Copy Link</button>
+            </div>
+            <div class="link-hint">Share this link with customers on WhatsApp, Instagram, or anywhere online.</div>
+        </div>
+
+    </div>
+</div>
+</main>
+
+<script>
+    let currentUserId = null;
+
+    // ── CHECK LOGIN ──
+    async function checkAuth() {
+        try {
+            const res = await fetch('/api/auth/me');
+            const data = await res.json();
+            if (!data.loggedIn) {
+                document.getElementById('notLogged').style.display = 'block';
+            } else {
+                currentUserId = data.userId;
+                document.getElementById('setupForm').style.display = 'block';
+                loadProfile();
+            }
+        } catch(e) {
+            document.getElementById('notLogged').style.display = 'block';
+        }
+    }
+
+    // ── LOAD EXISTING PROFILE ──
+    async function loadProfile() {
+        try {
+            const res = await fetch(`/api/booking/profile/${currentUserId}`);
+            if (!res.ok) return; // No profile yet, use defaults
+            const p = await res.json();
+
+            if (p.business_name) document.getElementById('bizName').value = p.business_name;
+            if (p.phone) document.getElementById('bizPhone').value = p.phone;
+            if (p.whatsapp) document.getElementById('bizWhatsapp').value = p.whatsapp;
+            if (p.start_time) document.getElementById('startTime').value = p.start_time;
+            if (p.end_time) document.getElementById('endTime').value = p.end_time;
+            if (p.slot_duration) document.getElementById('slotDuration').value = p.slot_duration;
+
+            // Services
+            if (p.services) {
+                const services = JSON.parse(p.services);
+                if (services.length) {
+                    const list = document.getElementById('servicesList');
+                    list.innerHTML = '';
+                    services.forEach((s, i) => {
+                        const row = document.createElement('div');
+                        row.className = 'service-row';
+                        row.innerHTML = `<input type="text" class="service-field" value="${s}">
+                            ${i > 0 ? '<button class="remove-btn" onclick="removeService(this)">×</button>' : ''}`;
+                        list.appendChild(row);
+                    });
+                }
+            }
+
+            // Days
+            if (p.available_days) {
+                const days = JSON.parse(p.available_days);
+                document.querySelectorAll('.day-chip').forEach(chip => {
+                    chip.classList.toggle('selected', days.includes(chip.dataset.day));
+                });
+            }
+
+            // Show link
+            showBookingLink(currentUserId);
+        } catch(e) { /* no profile yet */ }
+    }
+
+    // ── DAYS ──
+    function toggleDay(chip) {
+        chip.classList.toggle('selected');
+    }
+
+    function getSelectedDays() {
+        return Array.from(document.querySelectorAll('.day-chip.selected')).map(c => c.dataset.day);
+    }
+
+    // ── SERVICES ──
+    function addService() {
+        const list = document.getElementById('servicesList');
+        const row = document.createElement('div');
+        row.className = 'service-row';
+        row.innerHTML = `<input type="text" class="service-field" placeholder="New service">
+            <button class="remove-btn" onclick="removeService(this)">×</button>`;
+        list.appendChild(row);
+    }
+
+    function removeService(btn) {
+        const list = document.getElementById('servicesList');
+        if (list.children.length > 1) btn.parentElement.remove();
+        else showToast('You need at least one service', 'error');
+    }
+
+    function getServices() {
+        return Array.from(document.querySelectorAll('.service-field'))
+            .map(i => i.value.trim()).filter(Boolean);
+    }
+
+    // ── SAVE ──
+    async function saveProfile() {
+        const bizName = document.getElementById('bizName').value.trim();
+        const phone = document.getElementById('bizPhone').value.trim();
+        const whatsapp = document.getElementById('bizWhatsapp').value.trim();
+        const services = getServices();
+        const days = getSelectedDays();
+        const startTime = document.getElementById('startTime').value;
+        const endTime = document.getElementById('endTime').value;
+        const slotDuration = parseInt(document.getElementById('slotDuration').value);
+
+        if (!bizName) { showToast('Please enter your business name', 'error'); return; }
+        if (!services.length) { showToast('Please add at least one service', 'error'); return; }
+        if (!days.length) { showToast('Please select at least one available day', 'error'); return; }
+
+        const btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        try {
+            const res = await fetch('/api/booking/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    business_name: bizName,
+                    phone, whatsapp, services, 
+                    available_days: days,
+                    start_time: startTime,
+                    end_time: endTime,
+                    slot_duration: slotDuration
+                })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error);
+
+            showToast('Profile saved! ✅', 'success');
+            showBookingLink(currentUserId);
+        } catch(e) {
+            showToast('Error saving profile. Please try again.', 'error');
+        }
+
+        btn.disabled = false;
+        btn.textContent = '💾 Save & Get My Booking Link';
+    }
+
+    // ── BOOKING LINK ──
+    function showBookingLink(userId) {
+        const link = `${window.location.origin}/booking/${userId}`;
+        document.getElementById('bookingLink').value = link;
+        document.getElementById('linkBox').classList.add('show');
+    }
+
+    function copyLink() {
+        const input = document.getElementById('bookingLink');
+        navigator.clipboard.writeText(input.value).then(() => {
+            showToast('Link copied! 📋', 'success');
+        }).catch(() => {
+            input.select();
+            document.execCommand('copy');
+            showToast('Link copied! 📋', 'success');
+        });
+    }
+
+    // ── TOAST ──
+    function showToast(msg, type = '') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = `toast ${type} show`;
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ── MOBILE MENU ──
+    document.getElementById('mobileMenu').addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('active');
+    });
+
+    // ── START ──
+    checkAuth();
+</script>
+<script>
+    document.getElementById('mobileMenu').addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('active');
+    });
+</script>
+
+<!-- Auth logout script (add this) -->
+<script>
+    fetch('/api/auth/me')
+        .then(r => r.json())
+        .then(data => {
+            const authLink = document.getElementById('authLink');
+            if (data.loggedIn) {
+                authLink.innerHTML = '<a href="#" onclick="logout()">Logout</a>';
+            } else {
+                authLink.innerHTML = '<a href="/login">Login</a>';
+            }
+        });
+    
+    function logout() {
+        fetch('/api/auth/logout', { method: 'POST' })
+            .then(() => window.location.href = '/');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book an Appointment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #1a6b4a;
+            --brand-light: #e8f5ee;
+            --brand-mid: #2d9467;
+            --accent: #f59e0b;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --bg: #f7f9f7;
+            --white: #ffffff;
+            --radius: 16px;
+            --shadow: 0 4px 24px rgba(26,107,74,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── HEADER ── */
+        .biz-header {
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-mid) 100%);
+            color: white;
+            padding: 2.5rem 1.5rem 3.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .biz-header::before {
+            content: '';
+            position: absolute;
+            top: -40px; right: -40px;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+        }
+        .biz-header::after {
+            content: '';
+            position: absolute;
+            bottom: -60px; left: -30px;
+            width: 250px; height: 250px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+        }
+        .biz-header .powered {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 0.75rem;
+        }
+        .biz-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.4rem;
+            position: relative;
+            z-index: 1;
+        }
+        .biz-header p {
+            opacity: 0.85;
+            font-size: 0.95rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── MAIN LAYOUT ── */
+        .page-wrap {
+            max-width: 560px;
+            margin: -1.5rem auto 3rem;
+            padding: 0 1.25rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ── STEPS ── */
+        .step { display: none; }
+        .step.active { display: block; }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(26,107,74,0.07);
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .card-head {
+            padding: 1.5rem 1.5rem 0;
+        }
+        .card-head .step-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--brand);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 0.35rem;
+        }
+        .card-head h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        .card-head p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+        .card-body { padding: 1.5rem; }
+        .card-foot {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafafa;
+        }
+
+        /* ── SERVICE TILES ── */
+        .service-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .service-tile {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .service-tile:hover { border-color: var(--brand-mid); background: var(--brand-light); }
+        .service-tile.selected { border-color: var(--brand); background: var(--brand-light); }
+        .service-tile .name { font-weight: 600; font-size: 0.95rem; }
+        .service-tile .check {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            color: transparent;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .service-tile.selected .check {
+            background: var(--brand);
+            border-color: var(--brand);
+            color: white;
+        }
+
+        /* ── CALENDAR ── */
+        .cal-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .cal-nav h3 { font-size: 1rem; font-weight: 700; }
+        .cal-nav button {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .cal-nav button:hover { border-color: var(--brand); color: var(--brand); }
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.35rem;
+            margin-bottom: 1.25rem;
+        }
+        .cal-day-label {
+            text-align: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding: 0.25rem 0;
+            text-transform: uppercase;
+        }
+        .cal-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.15s;
+        }
+        .cal-day:hover:not(.disabled):not(.empty) { border-color: var(--brand-mid); background: var(--brand-light); }
+        .cal-day.selected { background: var(--brand); color: white; border-color: var(--brand); font-weight: 700; }
+        .cal-day.today { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+        .cal-day.today.selected { background: var(--brand); color: white; border-color: var(--brand); }
+        .cal-day.disabled { color: #d1d5db; cursor: not-allowed; }
+        .cal-day.empty { cursor: default; }
+
+        /* ── TIME SLOTS ── */
+        .slots-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+        }
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+        .slot {
+            padding: 0.6rem 0.5rem;
+            text-align: center;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .slot:hover:not(.taken) { border-color: var(--brand-mid); background: var(--brand-light); }
+        .slot.selected { background: var(--brand); color: white; border-color: var(--brand); }
+        .slot.taken { background: #f3f4f6; color: #d1d5db; cursor: not-allowed; text-decoration: line-through; }
+        .no-slots {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* ── FORM FIELDS ── */
+        .field { margin-bottom: 1.1rem; }
+        .field:last-child { margin-bottom: 0; }
+        .field label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+        .field label .opt { font-weight: 400; color: var(--text-muted); }
+        .field input,
+        .field textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .field input:focus,
+        .field textarea:focus {
+            outline: none;
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px var(--brand-light);
+        }
+
+        /* ── BOOKING SUMMARY ── */
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-row .label { color: var(--text-muted); font-weight: 500; }
+        .summary-row .value { font-weight: 700; text-align: right; }
+
+        /* ── BUTTONS ── */
+        .btn-back {
+            background: none;
+            border: 2px solid var(--border);
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.65rem 1.25rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-back:hover { border-color: var(--brand); color: var(--brand); }
+        .btn-next {
+            background: var(--brand);
+            color: white;
+            border: none;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 0.75rem 1.75rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-next:hover { background: var(--brand-mid); transform: translateY(-1px); }
+        .btn-next:disabled { background: #9ca3af; cursor: not-allowed; transform: none; }
+        .btn-confirm {
+            background: linear-gradient(135deg, var(--brand), var(--brand-mid));
+            color: white;
+            border: none;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 0.85rem 2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 14px rgba(26,107,74,0.3);
+        }
+        .btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(26,107,74,0.4); }
+
+        /* ── SUCCESS ── */
+        .success-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+        }
+        .success-icon {
+            width: 72px; height: 72px;
+            background: var(--brand-light);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1.25rem;
+        }
+        .success-card h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .success-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem; }
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: #25d366;
+            color: white;
+            text-decoration: none;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 700;
+            padding: 0.85rem 2rem;
+            border-radius: 12px;
+            transition: all 0.2s;
+            margin-bottom: 0.75rem;
+        }
+        .whatsapp-btn:hover { background: #1ebe5d; transform: translateY(-1px); }
+        .whatsapp-icon { font-size: 1.2rem; }
+
+        /* ── LOADING ── */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.85);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .loading-overlay.show { display: flex; }
+        .spinner {
+            width: 44px; height: 44px;
+            border: 4px solid var(--brand-light);
+            border-top-color: var(--brand);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── NOT FOUND ── */
+        .not-found {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        .not-found .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .not-found h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .not-found p { color: var(--text-muted); }
+
+        @media (max-width: 480px) {
+            .biz-header h1 { font-size: 1.6rem; }
+            .slots-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p style="font-weight:600; color:var(--brand);">Loading...</p>
+</div>
+
+<!-- Business Header -->
+<div class="biz-header" id="bizHeader">
+    <div class="powered">Powered by May AI Lab</div>
+    <h1 id="bizName">Loading...</h1>
+    <p id="bizSubtitle">Book your appointment below</p>
+</div>
+
+<div class="page-wrap">
+
+    <!-- NOT FOUND -->
+    <div class="step active" id="step-notfound" style="display:none;">
+        <div class="card">
+            <div class="not-found">
+                <div class="icon">🔍</div>
+                <h2>Business not found</h2>
+                <p>This booking page doesn't exist or may have been removed.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 1: Choose Service -->
+    <div class="step" id="step-1">
+        <div class="card">
+            <div class="card-head">
+                <div class="step-label">Step 1 of 3</div>
+                <h2>What would you like to book? 🛠️</h2>
+                <p>Choose a service from the list below</p>
+            </div>
+            <div class="card-body">
+                <div class="service-grid" id="serviceGrid">
+                    <!-- populated by JS -->
+                </div>
+            </div>
+            <div class="card-foot">
+                <div></div>
+                <button class="btn-next" id="btnStep1Next" onclick="goStep(2)" disabled>Choose a date →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 2: Pick Date & Time -->
+    <div class="step" id="step-2">
+        <div class="card">
+            <div class="card-head">
+                <div class="step-label">Step 2 of 3</div>
+                <h2>Pick a date & time 📅</h2>
+                <p>Choose when you'd like to come in</p>
+            </div>
+            <div class="card-body">
+                <!-- Calendar -->
+                <div class="cal-nav">
+                    <button onclick="changeMonth(-1)">‹</button>
+                    <h3 id="calTitle"></h3>
+                    <button onclick="changeMonth(1)">›</button>
+                </div>
+                <div class="cal-grid" id="calGrid"></div>
+
+                <!-- Time slots -->
+                <div id="slotsSection" style="display:none;">
+                    <div class="slots-label">Available times</div>
+                    <div class="slots-grid" id="slotsGrid"></div>
+                </div>
+            </div>
+            <div class="card-foot">
+                <button class="btn-back" onclick="goStep(1)">← Back</button>
+                <button class="btn-next" id="btnStep2Next" onclick="goStep(3)" disabled>Your Details →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 3: Contact Details -->
+    <div class="step" id="step-3">
+        <div class="card">
+            <div class="card-head">
+                <div class="step-label">Step 3 of 3</div>
+                <h2>Your details 👤</h2>
+                <p>So the business knows who's coming</p>
+            </div>
+            <div class="card-body">
+                <div class="field">
+                    <label>Full Name</label>
+                    <input type="text" id="custName" placeholder="e.g., Thabo Nkosi">
+                </div>
+                <div class="field">
+                    <label>Phone / WhatsApp Number</label>
+                    <input type="tel" id="custPhone" placeholder="+27 79 123 4567">
+                </div>
+                <div class="field">
+                    <label>Email Address <span class="opt">(optional)</span></label>
+                    <input type="email" id="custEmail" placeholder="thabo@email.com">
+                </div>
+                <div class="field">
+                    <label>Any notes for the business? <span class="opt">(optional)</span></label>
+                    <textarea id="custNotes" rows="3" placeholder="e.g., I prefer a female stylist, I have sensitive skin..."></textarea>
+                </div>
+
+                <!-- Summary -->
+                <div style="background:var(--bg); border-radius:12px; padding:1rem; margin-top:1.25rem;">
+                    <div class="summary-row">
+                        <span class="label">Service</span>
+                        <span class="value" id="sumService">—</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Date</span>
+                        <span class="value" id="sumDate">—</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Time</span>
+                        <span class="value" id="sumTime">—</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-foot">
+                <button class="btn-back" onclick="goStep(2)">← Back</button>
+                <button class="btn-confirm" onclick="submitBooking()">✅ Confirm Booking</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="step" id="step-success">
+        <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <h2>Booking request sent!</h2>
+            <p>Your booking is <strong>pending confirmation</strong>. The business will reach out to confirm your appointment.</p>
+
+            <div style="background:var(--bg); border-radius:12px; padding:1rem; margin-bottom:1.5rem; text-align:left;">
+                <div class="summary-row">
+                    <span class="label">Service</span>
+                    <span class="value" id="successService">—</span>
+                </div>
+                <div class="summary-row">
+                    <span class="label">Date</span>
+                    <span class="value" id="successDate">—</span>
+                </div>
+                <div class="summary-row">
+                    <span class="label">Time</span>
+                    <span class="value" id="successTime">—</span>
+                </div>
+            </div>
+
+            <a id="whatsappLink" href="#" target="_blank" class="whatsapp-btn">
+                <span class="whatsapp-icon">💬</span>
+                Message the business on WhatsApp
+            </a>
+            <br>
+            <button onclick="location.reload()" style="background:none;border:none;color:var(--text-muted);font-family:inherit;font-size:0.85rem;cursor:pointer;text-decoration:underline;">
+                Make another booking
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ── STATE ──
+    let bizProfile = null;
+    let selectedService = null;
+    let selectedDate = null;
+    let selectedTime = null;
+    let takenSlots = [];
+    let calYear, calMonth;
+
+    const userId = window.location.pathname.split('/').pop();
+    const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    // ── INIT ──
+    async function init() {
+        showLoading(true);
+        try {
+            const res = await fetch(`/api/booking/profile/${userId}`);
+            if (!res.ok) throw new Error('Not found');
+            bizProfile = await res.json();
+            bizProfile.services = JSON.parse(bizProfile.services || '[]');
+            bizProfile.available_days = JSON.parse(bizProfile.available_days || '["Monday","Tuesday","Wednesday","Thursday","Friday"]');
+
+            document.getElementById('bizName').textContent = bizProfile.business_name || 'Book an Appointment';
+            document.title = `Book – ${bizProfile.business_name}`;
+
+            buildServices();
+
+            const now = new Date();
+            calYear = now.getFullYear();
+            calMonth = now.getMonth();
+            renderCalendar();
+
+            goStep(1);
+        } catch (e) {
+            document.getElementById('step-notfound').style.display = 'block';
+            document.getElementById('bizHeader').style.display = 'none';
+        }
+        showLoading(false);
+    }
+
+    // ── SERVICES ──
+    function buildServices() {
+        const grid = document.getElementById('serviceGrid');
+        if (!bizProfile.services.length) {
+            grid.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">No services listed yet.</p>';
+            return;
+        }
+        grid.innerHTML = bizProfile.services.map(s => `
+            <div class="service-tile" onclick="selectService('${s}', this)">
+                <span class="name">${s}</span>
+                <span class="check">✓</span>
+            </div>
+        `).join('');
+    }
+
+    function selectService(name, el) {
+        document.querySelectorAll('.service-tile').forEach(t => t.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedService = name;
+        document.getElementById('btnStep1Next').disabled = false;
+    }
+
+    // ── CALENDAR ──
+    function renderCalendar() {
+        document.getElementById('calTitle').textContent = `${MONTHS[calMonth]} ${calYear}`;
+        const grid = document.getElementById('calGrid');
+
+        // Day labels
+        let html = DAYS.map(d => `<div class="cal-day-label">${d}</div>`).join('');
+
+        const firstDay = new Date(calYear, calMonth, 1).getDay();
+        const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        // Empty cells
+        for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const date = new Date(calYear, calMonth, d);
+            const dayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][date.getDay()];
+            const isPast = date < today;
+            const isAvailable = bizProfile.available_days.includes(dayName);
+            const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const isToday = date.getTime() === today.getTime();
+            const isSelected = dateStr === selectedDate;
+
+            let cls = 'cal-day';
+            if (isPast || !isAvailable) cls += ' disabled';
+            if (isToday) cls += ' today';
+            if (isSelected) cls += ' selected';
+
+            const clickable = !isPast && isAvailable;
+            html += `<div class="${cls}" ${clickable ? `onclick="selectDate('${dateStr}', this)"` : ''}>${d}</div>`;
+        }
+
+        grid.innerHTML = html;
+    }
+
+    function changeMonth(dir) {
+        calMonth += dir;
+        if (calMonth > 11) { calMonth = 0; calYear++; }
+        if (calMonth < 0) { calMonth = 11; calYear--; }
+        renderCalendar();
+    }
+
+    async function selectDate(dateStr, el) {
+        selectedDate = dateStr;
+        selectedTime = null;
+        document.getElementById('btnStep2Next').disabled = true;
+        renderCalendar();
+
+        // Load taken slots
+        showLoading(true);
+        try {
+            const res = await fetch(`/api/booking/slots/${userId}/${dateStr}`);
+            takenSlots = await res.json();
+        } catch(e) { takenSlots = []; }
+        showLoading(false);
+
+        renderSlots();
+        document.getElementById('slotsSection').style.display = 'block';
+    }
+
+    function renderSlots() {
+        const grid = document.getElementById('slotsGrid');
+        const slots = generateSlots();
+
+        if (!slots.length) {
+            grid.innerHTML = '<div class="no-slots">No available times for this day.</div>';
+            return;
+        }
+
+        grid.innerHTML = slots.map(t => {
+            const taken = takenSlots.includes(t);
+            const selected = t === selectedTime;
+            let cls = 'slot';
+            if (taken) cls += ' taken';
+            else if (selected) cls += ' selected';
+            return `<div class="${cls}" ${!taken ? `onclick="selectTime('${t}', this)"` : ''}>${t}</div>`;
+        }).join('');
+    }
+
+    function generateSlots() {
+        const slots = [];
+        const [startH, startM] = bizProfile.start_time.split(':').map(Number);
+        const [endH, endM] = bizProfile.end_time.split(':').map(Number);
+        const duration = bizProfile.slot_duration || 60;
+
+        let cur = startH * 60 + startM;
+        const end = endH * 60 + endM;
+
+        while (cur + duration <= end) {
+            const h = Math.floor(cur / 60);
+            const m = cur % 60;
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const displayH = h > 12 ? h - 12 : h === 0 ? 12 : h;
+            slots.push(`${String(displayH).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ampm}`);
+            cur += duration;
+        }
+        return slots;
+    }
+
+    function selectTime(time, el) {
+        document.querySelectorAll('.slot:not(.taken)').forEach(s => s.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedTime = time;
+        document.getElementById('btnStep2Next').disabled = false;
+    }
+
+    // ── NAVIGATION ──
+    function goStep(n) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById(`step-${n}`).classList.add('active');
+
+        if (n === 3) {
+            const dateObj = new Date(selectedDate + 'T00:00:00');
+            const formatted = dateObj.toLocaleDateString('en-ZA', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+            document.getElementById('sumService').textContent = selectedService;
+            document.getElementById('sumDate').textContent = formatted;
+            document.getElementById('sumTime').textContent = selectedTime;
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── SUBMIT ──
+    async function submitBooking() {
+        const name = document.getElementById('custName').value.trim();
+        const phone = document.getElementById('custPhone').value.trim();
+        const email = document.getElementById('custEmail').value.trim();
+        const notes = document.getElementById('custNotes').value.trim();
+
+        if (!name) { alert('Please enter your name.'); return; }
+        if (!phone) { alert('Please enter your phone number.'); return; }
+
+        showLoading(true);
+        try {
+            const res = await fetch('/api/booking/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: userId,
+                    service: selectedService,
+                    date: selectedDate,
+                    time: selectedTime,
+                    customer_name: name,
+                    customer_phone: phone,
+                    customer_email: email,
+                    notes
+                })
+            });
+            const result = await res.json();
+            if (!result.success) throw new Error(result.error);
+
+            // Show success
+            const dateObj = new Date(selectedDate + 'T00:00:00');
+            const formatted = dateObj.toLocaleDateString('en-ZA', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+            document.getElementById('successService').textContent = selectedService;
+            document.getElementById('successDate').textContent = formatted;
+            document.getElementById('successTime').textContent = selectedTime;
+
+            // WhatsApp link
+            if (bizProfile.whatsapp) {
+                const wa = bizProfile.whatsapp.replace(/\D/g, '');
+                const msg = encodeURIComponent(`Hi! I just booked a *${selectedService}* appointment on *${formatted}* at *${selectedTime}*. My name is ${name} and my number is ${phone}.`);
+                document.getElementById('whatsappLink').href = `https://wa.me/${wa}?text=${msg}`;
+            } else {
+                document.getElementById('whatsappLink').style.display = 'none';
+            }
+
+            goStep('success');
+        } catch(e) {
+            alert('Something went wrong. Please try again.');
+        }
+        showLoading(false);
+    }
+
+    function showLoading(show) {
+        document.getElementById('loadingOverlay').classList.toggle('show', show);
+    }
+
+    // ── START ──
+    init();
+</script>
+<script>
+    document.getElementById('mobileMenu').addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('active');
+    });
+</script>
+
+<!-- Auth logout script (add this) -->
+<script>
+    fetch('/api/auth/me')
+        .then(r => r.json())
+        .then(data => {
+            const authLink = document.getElementById('authLink');
+            if (data.loggedIn) {
+                authLink.innerHTML = '<a href="#" onclick="logout()">Logout</a>';
+            } else {
+                authLink.innerHTML = '<a href="/login">Login</a>';
+            }
+        });
+    
+    function logout() {
+        fetch('/api/auth/logout', { method: 'POST' })
+            .then(() => window.location.href = '/');
+    }
+</script>
+</body>
+</html>
